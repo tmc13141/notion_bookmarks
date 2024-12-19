@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Clarity } from "@/components/Clarity";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,6 +36,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        <Clarity clarityId={process.env.NEXT_PUBLIC_CLARITY_ID || ''} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
