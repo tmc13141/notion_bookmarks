@@ -21,7 +21,7 @@ export const viewport = {
 
 export const metadata: Metadata = {
   title:{
-    default:"Ezho工具箱",
+    default:"Ezho导航 - 超级个体工具箱,精挑细选各种神器",
     template: "%s | Ezho工具箱",
   },
   keywords: ["AI导航", "超级个体", "个体", "indie hacker", "自媒体", "创业", "灵感"],
