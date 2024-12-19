@@ -108,6 +108,7 @@ export const getLinks = cache(async () => {
         return response.results.map((page: any) => ({
             id: page.id,
             name: page.properties.Name?.title[0]?.plain_text || '未命名',
+            created: page.properties.Created?.created_time || '',
             desc: page.properties.desc?.rich_text[0]?.plain_text || '',
             url: page.properties.URL?.url || '#',
             category1: page.properties.category1?.select?.name || '未分类',

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import ThemeToggle from '@/components/ThemeToggle'
 import * as Icons from 'lucide-react'
+import { LucideIcon } from 'lucide-react'
 
 interface Category {
   id: string
@@ -61,7 +62,7 @@ export default function Navigation({ categories }: NavigationProps) {
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center space-x-2">
             <Icons.Rocket className="w-5 h-5" />
-            <span className="font-medium">我的导航</span>
+            <span className="font-medium">超级个体工具箱</span>
           </div>
           <ThemeToggle />
         </div>
@@ -90,15 +91,15 @@ export default function Navigation({ categories }: NavigationProps) {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-2">
             <Icons.Rocket className="w-5 h-5" />
-            <span className="font-medium">我的导航</span>
+            <span className="font-medium">超级个体工具箱</span>
           </div>
           <ThemeToggle />
         </div>
         <ul className="space-y-1">
           {categories.map((category) => {
-            const IconComponent = category.iconName ? 
-              (Icons as Record<string, React.ComponentType>)[category.iconName] || Icons.Globe : 
-              Icons.Globe;
+            const IconComponent = category.iconName && (category.iconName in Icons)
+              ? (Icons[category.iconName as keyof typeof Icons] as React.ComponentType)
+              : Icons.Globe;
 
             return (
               <li key={category.id}>
@@ -147,6 +148,27 @@ export default function Navigation({ categories }: NavigationProps) {
             )
           })}
         </ul>
+        {/* 社交媒体链接 */}
+        <div className="fixed bottom-8 left-8 flex space-x-4">
+          <a
+            href="https://github.com/moyuguy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            title="GitHub"
+          >
+            <Icons.Github className="w-5 h-5" />
+          </a>
+          <a
+            href="https://ezho.top"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            title="Blog"
+          >
+            <Icons.Newspaper className="w-5 h-5" />
+          </a>
+        </div>
       </nav>
     </>
   )

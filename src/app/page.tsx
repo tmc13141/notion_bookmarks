@@ -1,16 +1,14 @@
 // src/app/page.tsx
 import LinkContainer from '@/components/LinkContainer';
-import Footer from '@/components/layout/Footer';
 import Navigation from '@/components/layout/Navigation';
-import { getLinks, getCategories, getWebsiteConfig } from '@/lib/notion';
+import { getLinks, getCategories } from '@/lib/notion';
 import AnimatedMain from '../components/AnimatedMain';
 
 export default async function HomePage() {
   // 获取数据
-  const [notionCategories, links, config] = await Promise.all([
+  const [notionCategories, links] = await Promise.all([
     getCategories(),
     getLinks(),
-    getWebsiteConfig()
   ]);
 
   // 获取启用的分类名称集合
@@ -59,18 +57,27 @@ export default async function HomePage() {
         
         <AnimatedMain>
           <div className="flex-1 w-full px-4 py-8 md:py-12">
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-[2000px] mx-auto">
               <LinkContainer 
                 initialLinks={processedLinks} 
                 enabledCategories={enabledCategories}
                 categories={activeCategories}
               />
+              {/* Footer content */}
+              <div className="mt-8 py-6 border-t">
+                <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Built with Next.js and Notion
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    2024 <a href="https://ezho.top" target="_blank" className="hover:text-foreground transition-colors">Ezho</a>. All rights reserved.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </AnimatedMain>
       </div>
-      
-      <Footer />
     </div>
   );
 }
