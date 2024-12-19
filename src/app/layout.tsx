@@ -15,10 +15,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title:{
-    default:"Chaos Palace",
-    template: "%s | Chaos Palace",
+    default:"Ezho工具箱",
+    template: "%s | Ezho工具箱",
   },
-  description: "Notion Navigation",
+  keywords: ["AI导航", "超级个体", "个体", "indie hacker", "自媒体", "创业", "灵感"],
+  description: "Ezho工具箱，超级个体需要知道的各种好用工具",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
 };
 
 export default function RootLayout({
