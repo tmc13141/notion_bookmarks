@@ -82,14 +82,14 @@ export default function LinkCard({ link, className }: LinkCardProps) {
           transition-all duration-300 ease-out
           hover:shadow-lg hover:shadow-primary/5
           bg-card/50 backdrop-blur-sm
-          h-[160px] min-w-[280px]
+          h-[180px] min-w-[280px]
           ${className || ''}
         `}
       >
         {/* 内容容器 */}
-        <div className="flex flex-col gap-2.5 h-full overflow-hidden">
+        <div className="flex flex-col h-full">
           {/* 图标和名称行 */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             {/* 图标容器 */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
@@ -132,13 +132,13 @@ export default function LinkCard({ link, className }: LinkCardProps) {
           {/* 描述行 */}
           {link.desc && (
             <div 
-              className="relative"
+              className="relative flex-1 min-h-0"
               onMouseEnter={(e) => handleMouseEnter(e, setDescTooltip)}
               onMouseLeave={() => handleMouseLeave(setDescTooltip)}
             >
               <p className="text-sm text-muted-foreground
                          group-hover:text-foreground/80
-                         line-clamp-3 transition-colors">
+                         line-clamp-2 transition-colors">
                 {link.desc}
               </p>
             </div>
@@ -146,23 +146,25 @@ export default function LinkCard({ link, className }: LinkCardProps) {
 
           {/* 标签行 - 放在底部 */}
           {link.tags && link.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-auto">
+            <div className="flex flex-wrap gap-1.5 mt-auto flex-shrink-0">
               {link.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="px-2 py-0.5 text-xs rounded-md
+                  className="inline-flex items-center px-2 py-0.5 text-xs rounded-md
                            bg-muted/40 text-muted-foreground
                            group-hover:bg-primary/10 group-hover:text-primary/90
-                           transition-colors whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]"
+                           transition-colors"
+                  title={tag}
                 >
-                  {tag}
+                  <span className="truncate max-w-[80px]">{tag}</span>
                 </span>
               ))}
               {link.tags.length > 3 && (
-                <span className="px-2 py-0.5 text-xs rounded-md
+                <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-md
                               bg-muted/40 text-muted-foreground
                               group-hover:bg-primary/10 group-hover:text-primary/90
-                              transition-colors">
+                              transition-colors shrink-0"
+                >
                   +{link.tags.length - 3}
                 </span>
               )}

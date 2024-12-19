@@ -56,7 +56,7 @@ export default async function HomePage() {
         <Navigation categories={categoriesWithSubs} />
         
         <AnimatedMain>
-          <div className="flex-1 w-full px-4 py-8 md:py-12">
+          <div className="flex-1 w-full px-4 py-8 lg:py-12 mt-28 lg:mt-0">
             <div className="max-w-[2000px] mx-auto">
               <LinkContainer 
                 initialLinks={processedLinks} 

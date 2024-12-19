@@ -58,7 +58,7 @@ export default function Navigation({ categories }: NavigationProps) {
   return (
     <>
       {/* 移动端顶部导航 */}
-      <nav className="md:hidden fixed top-0 left-0 right-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <nav className="lg:hidden fixed top-0 left-0 right-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center space-x-2">
             <Icons.Rocket className="w-5 h-5" />
@@ -66,28 +66,30 @@ export default function Navigation({ categories }: NavigationProps) {
           </div>
           <ThemeToggle />
         </div>
-        <div className="overflow-x-auto flex items-center h-12 border-t">
-          <div className="flex space-x-2 px-4">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => handleNavClick(category.id)}
-                className={cn(
-                  "whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors",
-                  activeCategory === category.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-              >
-                {category.name}
-              </button>
-            ))}
+        <div className="overflow-x-auto flex items-center h-12 border-t scrollbar-none">
+          <div className="flex px-4 min-w-full">
+            <div className="flex space-x-2 mx-auto">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => handleNavClick(category.id)}
+                  className={cn(
+                    "whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors shrink-0",
+                    activeCategory === category.id
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  )}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </nav>
 
       {/* 桌面端边导航 */}
-      <nav className="hidden md:block w-64 h-screen sticky top-0 p-4 overflow-y-auto border-r">
+      <nav className="hidden lg:block w-[280px] flex-shrink-0 h-screen sticky top-0 p-4 overflow-y-auto border-r">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-2">
             <Icons.Rocket className="w-5 h-5" />
