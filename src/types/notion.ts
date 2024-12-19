@@ -27,3 +27,16 @@ export interface ConfigItem {
     linkPropertyIconUrl: string;
     linkPropertyIconFile: string;
 }
+
+// 分类配置类型
+export interface Category {
+  id: string;
+  name: string;
+  iconName: string;
+  order: number;
+  enabled: boolean;
+  subCategories?: {
+    id: string;
+    name: string;
+  }[];
+}

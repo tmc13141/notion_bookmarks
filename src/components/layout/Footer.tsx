@@ -1,30 +1,17 @@
-// src/components/Footer.tsx
+'use client';
+
+
 export default function Footer() {
-    return (
-      <footer className="mt-auto py-6 px-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto flex flex-col items-center justify-center space-y-2">
-          {/* 版权信息 */}
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            © {new Date().getFullYear()} 我的导航. All rights reserved.
-          </p>
-          
-          {/* 可选：添加一些链接 */}
-          <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-            <a 
-              href="#" 
-              className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-            >
-              关于
-            </a>
-            <span>•</span>
-            <a 
-              href="#" 
-              className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-            >
-              联系我
-            </a>
-          </div>
-        </div>
-      </footer>
-    );
-  }
+  return (
+    <footer className="border-t py-6 md:py-0">
+      <div className="container flex flex-col items-center gap-4 md:h-16 md:flex-row md:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Built with Next.js and Notion
+        </p>
+        <p className="text-sm text-muted-foreground">
+          © 2024 Your Name. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  )
+}

@@ -1,6 +1,9 @@
-// src/components/LinkCard.tsx
+'use client';
+
 import Image from 'next/image';
 import { Link } from '@/types/notion';
+import { motion } from 'framer-motion';
+import { IconExternalLink } from '@tabler/icons-react';
 
 interface LinkCardProps {
   link: Link;
@@ -15,61 +18,79 @@ function getIconUrl(link: Link): string {
   if (link.iconlink) {
     return link.iconlink;
   }
-  return 'public/vercel.svg'; // 确保你在public目录下有一个默认图标
+  return '/next.svg'; // Next.js 会自动从 public 目录加载
 }
 
 export default function LinkCard({ link, className }: LinkCardProps) {
   return (
-    <a
+    <motion.a
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       className={`
         block group relative overflow-hidden
-        p-4 rounded-lg border border-gray-200
+        p-6 rounded-xl border border-border/50
         transition-all duration-300 ease-out
-        hover:shadow-lg hover:-translate-y-1
-        hover:border-blue-200
-        bg-white dark:bg-gray-800
-        dark:border-gray-700 dark:hover:border-blue-500
+        hover:shadow-lg hover:shadow-primary/5
+        bg-card/50 backdrop-blur-sm
+        h-[180px]
         ${className || ''}
       `}
     >
       {/* 内容容器 */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 h-full">
         {/* 图标和名称行 */}
         <div className="flex items-center gap-3">
           {/* 图标容器 */}
-          <div className="relative w-8 h-8 rounded-md overflow-hidden 
-                        group-hover:ring-2 ring-blue-400 transition-all">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="relative w-10 h-10 rounded-xl overflow-hidden transition-all shrink-0
+                     bg-muted/50 p-1.5 border border-border/50"
+          >
             <Image
               src={getIconUrl(link)}
               alt="Site Icon"
               fill
-              className="object-cover"
-              sizes="32px"
+              className="object-contain"
+              sizes="40px"
             />
-          </div>
+          </motion.div>
           
           {/* 网站名称 */}
-          <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200
-                         group-hover:text-blue-600 dark:group-hover:text-blue-400
-                         transition-colors">
-            {link.name}
-          </h3>
+          <div className="flex-1 flex items-center justify-between gap-2">
+            <h3 className="text-lg font-medium text-foreground/90
+                         group-hover:text-primary
+                         transition-colors line-clamp-1">
+              {link.name}
+            </h3>
+            <IconExternalLink 
+              className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" 
+            />
+          </div>
         </div>
 
-        {/* 标签行 */}
+        {/* 描述行 */}
+        {link.desc && (
+          <p className="text-sm text-muted-foreground
+                       group-hover:text-foreground/80
+                       line-clamp-2 transition-colors">
+            {link.desc}
+          </p>
+        )}
+
+        {/* 标签行 - 放在底部 */}
         {link.tags && link.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5 mt-auto">
             {link.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-1 text-xs rounded-full
-                         bg-gray-100 text-gray-600
-                         dark:bg-gray-700 dark:text-gray-300
-                         group-hover:bg-blue-100 group-hover:text-blue-700
-                         dark:group-hover:bg-blue-900 dark:group-hover:text-blue-200
+                className="px-2 py-0.5 text-xs rounded-md
+                         bg-muted/50 text-muted-foreground
+                         group-hover:bg-primary/10 group-hover:text-primary
                          transition-colors"
               >
                 {tag}
@@ -77,22 +98,12 @@ export default function LinkCard({ link, className }: LinkCardProps) {
             ))}
           </div>
         )}
-
-        {/* 描述行 */}
-        {link.desc && (
-          <p className="text-sm text-gray-600 dark:text-gray-400
-                       group-hover:text-gray-800 dark:group-hover:text-gray-200
-                       line-clamp-2 transition-colors">
-            {link.desc}
-          </p>
-        )}
       </div>
 
       {/* 渐变悬浮效果 */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-transparent to-transparent
-                    group-hover:from-blue-50/50 group-hover:to-indigo-50/50
-                    dark:group-hover:from-blue-900/20 dark:group-hover:to-indigo-900/20
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-transparent via-transparent to-transparent
+                    group-hover:from-primary/5 group-hover:via-primary/2 group-hover:to-transparent
                     transition-colors duration-500" />
-    </a>
+    </motion.a>
   );
 }

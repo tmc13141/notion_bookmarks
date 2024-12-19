@@ -1,95 +1,79 @@
 // src/app/page.tsx
-'use client';
-
-import { useState, useEffect } from 'react';
-import { Link } from '@/types/notion';
-import LinkCard from '@/components/LinkCard';
-import Sidebar from '@/components/Sidebar';
-import { organizeCategories } from '@/lib/category';
-import Header from '@/components/layout/Header';
+import LinkContainer from '@/components/LinkContainer';
 import Footer from '@/components/layout/Footer';
+import Navigation from '@/components/layout/Navigation';
+import { getLinks, getCategories, getWebsiteConfig } from '@/lib/notion';
+import AnimatedMain from '../components/AnimatedMain';
 
-export default function HomePage() {
-  const [links, setLinks] = useState<Link[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedSubCategory, setSelectedSubCategory] = useState<string>();
-
+export default async function HomePage() {
   // 获取数据
-  useEffect(() => {
-    async function fetchLinks() {
-      try {
-        const response = await fetch('/api/links');
-        if (!response.ok) {
-          throw new Error('获取数据失败');
-        }
-        const data = await response.json();
-        setLinks(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '未知错误');
-      } finally {
-        setLoading(false);
-      }
-    }
+  const [notionCategories, links, config] = await Promise.all([
+    getCategories(),
+    getLinks(),
+    getWebsiteConfig()
+  ]);
 
-    fetchLinks();
-  }, []);
+  // 获取启用的分类名称集合
+  const enabledCategories = new Set(notionCategories.map(cat => cat.name));
 
-  // 处理加载状态
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">
-      <p className="text-lg">加载中...</p>
-    </div>;
-  }
+  // 处理链接数据，只保留启用分类中的链接
+  const processedLinks = links
+    .map(link => ({
+      ...link,
+      category1: link.category1 || '未分类',
+      category2: link.category2 || '默认'
+    }))
+    .filter(link => enabledCategories.has(link.category1));
 
-  // 处理错误状态
-  if (error) {
-    return <div className="min-h-screen flex items-center justify-center">
-      <p className="text-lg text-red-500">错误: {error}</p>
-    </div>;
-  }
+  // 获取有链接的分类集合
+  const categoriesWithLinks = new Set(processedLinks.map(link => link.category1));
 
-  // 组织分类数据
-  const categories = organizeCategories(links);
+  // 过滤掉没有链接的分类
+  const activeCategories = notionCategories.filter(category => 
+    categoriesWithLinks.has(category.name)
+  );
 
-  // 过滤链接
-  const filteredLinks = links.filter(link => {
-    if (selectedCategory === 'all') return true;
-    if (!selectedSubCategory) return link.category1 === selectedCategory;
-    return link.category1 === selectedCategory && link.category2 === selectedSubCategory;
+  // 为 Notion 分类添加子分类信息
+  const categoriesWithSubs = activeCategories.map(category => {
+    const subCategories = new Set(
+      processedLinks
+        .filter(link => link.category1 === category.name)
+        .map(link => link.category2)
+    );
+
+    return {
+      ...category,
+      subCategories: Array.from(subCategories).map(subCat => ({
+        id: subCat.toLowerCase().replace(/\s+/g, '-'),
+        name: subCat
+      }))
+    };
   });
 
-  // 处理分类选择
-  const handleCategorySelect = (category: string, subCategory?: string) => {
-    setSelectedCategory(category);
-    setSelectedSubCategory(subCategory);
-  };
-
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <Header />
+    <div className="relative min-h-screen flex flex-col bg-gradient-to-b from-background to-secondary/20">
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(45%_45%_at_50%_50%,rgba(30,144,255,0.1)_0%,rgba(30,144,255,0)_100%)] dark:bg-[radial-gradient(45%_45%_at_50%_50%,rgba(30,144,255,0.05)_0%,rgba(30,144,255,0)_100%)]" />
       
-      <main className="flex-1 p-4 md:p-8">
-        <div className="max-w-7xl mx-auto">
-          {/* 原有的主要内容 */}
-          <div className="flex gap-8">
-            <Sidebar
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={handleCategorySelect}
-            />
-            
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredLinks.map((link) => (
-                <LinkCard key={link.id} link={link} />
-              ))}
+      <div className="flex-1 flex">
+        <Navigation categories={categoriesWithSubs} />
+        
+        <AnimatedMain>
+          <div className="flex-1 w-full px-4 py-8 md:py-12">
+            <div className="max-w-7xl mx-auto">
+              <LinkContainer 
+                initialLinks={processedLinks} 
+                enabledCategories={enabledCategories}
+                categories={activeCategories}
+              />
             </div>
           </div>
-        </div>
-      </main>
+        </AnimatedMain>
+      </div>
       
       <Footer />
     </div>
   );
 }
+
+// 从配置中获取重验证时间
+export const revalidate = 3600;
