@@ -78,16 +78,16 @@ export default function LinkCard({ link, className }: LinkCardProps) {
         whileTap={{ scale: 0.98 }}
         className={`
           block group relative
-          p-5 rounded-xl border border-border/50
+          p-4 rounded-xl border border-border/50
           transition-all duration-300 ease-out
           hover:shadow-lg hover:shadow-primary/5
           bg-card/50 backdrop-blur-sm
-          h-[180px] min-w-[280px]
+          h-[160px] min-w-[280px]
           ${className || ''}
         `}
       >
         {/* 内容容器 */}
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full gap-2">
           {/* 图标和名称行 */}
           <div className="flex items-center gap-3 flex-shrink-0">
             {/* 图标容器 */}
@@ -146,7 +146,7 @@ export default function LinkCard({ link, className }: LinkCardProps) {
 
           {/* 标签行 - 放在底部 */}
           {link.tags && link.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-auto flex-shrink-0">
+            <div className="flex flex-wrap gap-1.5 flex-shrink-0">
               {link.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
