@@ -13,6 +13,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export const metadata: Metadata = {
   title:{
     default:"Ezho工具箱",
@@ -20,11 +26,6 @@ export const metadata: Metadata = {
   },
   keywords: ["AI导航", "超级个体", "个体", "indie hacker", "自媒体", "创业", "灵感"],
   description: "Ezho工具箱，超级个体需要知道的各种好用工具",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
 };
 
 export default function RootLayout({

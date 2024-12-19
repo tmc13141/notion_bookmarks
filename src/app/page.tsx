@@ -83,4 +83,4 @@ export default async function HomePage() {
 }
 
 // 从配置中获取重验证时间
-export const revalidate = 3600;
+export const revalidate = 7200;
