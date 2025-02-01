@@ -6,7 +6,7 @@ import AnimatedMain from '../components/AnimatedMain';
 import Footer from '@/components/layout/Footer';
 import { envConfig } from '@/config';
 
-export const revalidate = envConfig.REVALIDATE_TIME; // 从环境变量中获取重新验证时间
+export const revalidate = 43200; // 12小时重新验证一次
 
 export default async function HomePage() {
   // 获取数据
