@@ -1,15 +1,21 @@
 // src/app/page.tsx
 import LinkContainer from '@/components/LinkContainer';
 import Navigation from '@/components/layout/Navigation';
-import { getLinks, getCategories } from '@/lib/notion';
+import { getLinks, getCategories, getWebsiteConfig } from '@/lib/notion';
 import AnimatedMain from '../components/AnimatedMain';
+import Footer from '@/components/layout/Footer';
+import { envConfig } from '@/config';
+
+export const revalidate = envConfig.REVALIDATE_TIME; // 从环境变量中获取重新验证时间
 
 export default async function HomePage() {
   // 获取数据
-  const [notionCategories, links] = await Promise.all([
+  const [notionCategories, links, config] = await Promise.all([
     getCategories(),
     getLinks(),
+    getWebsiteConfig(),
   ]);
+
 
   // 获取启用的分类名称集合
   const enabledCategories = new Set(notionCategories.map(cat => cat.name));
@@ -53,34 +59,21 @@ export default async function HomePage() {
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(45%_45%_at_50%_50%,rgba(30,144,255,0.1)_0%,rgba(30,144,255,0)_100%)] dark:bg-[radial-gradient(45%_45%_at_50%_50%,rgba(30,144,255,0.05)_0%,rgba(30,144,255,0)_100%)]" />
       
       <div className="flex-1 flex">
-        <Navigation categories={categoriesWithSubs} />
+        <Navigation categories={categoriesWithSubs} config={config} />
         
         <AnimatedMain>
-          <div className="flex-1 w-full px-4 py-8 lg:py-12 mt-28 lg:mt-0">
+          <div className="flex-1 w-full px-4 py-8 lg:py-12 mt-28 lg:mt-0 pb-24">
             <div className="max-w-[2000px] mx-auto">
               <LinkContainer 
                 initialLinks={processedLinks} 
                 enabledCategories={enabledCategories}
                 categories={activeCategories}
               />
-              {/* Footer content */}
-              <div className="mt-8 py-6 border-t">
-                <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
-                  <p className="text-sm text-muted-foreground">
-                    Built with Next.js and Notion
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    2024 <a href="https://ezho.top" target="_blank" className="hover:text-foreground transition-colors">Ezho</a>. All rights reserved.
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         </AnimatedMain>
       </div>
+      <Footer config={config} />
     </div>
   );
 }
-
-// 从配置中获取重验证时间
-export const revalidate = 7200;

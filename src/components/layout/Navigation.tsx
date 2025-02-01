@@ -4,7 +4,10 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import ThemeToggle from '@/components/ThemeToggle'
 import * as Icons from 'lucide-react'
-import { LucideIcon } from 'lucide-react'
+import { WebsiteConfig } from '@/types/notion'
+import { FaGithub, FaXTwitter, FaWeibo, FaMessage } from 'react-icons/fa6'
+import { FaBlogger } from 'react-icons/fa'
+
 
 interface Category {
   id: string
@@ -18,9 +21,18 @@ interface Category {
 
 interface NavigationProps {
   categories: Category[]
+  config: WebsiteConfig
 }
 
-export default function Navigation({ categories }: NavigationProps) {
+const defaultConfig: WebsiteConfig = {
+  SOCIAL_GITHUB: '',
+  SOCIAL_BLOG: '',
+  SOCIAL_X: '',
+  SOCIAL_JIKE: '',
+  SOCIAL_WEIBO: ''
+}
+
+export default function Navigation({ categories, config = defaultConfig }: NavigationProps) {
   const [activeCategory, setActiveCategory] = useState<string>('')
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
 
@@ -62,7 +74,7 @@ export default function Navigation({ categories }: NavigationProps) {
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center space-x-2">
             <Icons.Rocket className="w-5 h-5" />
-            <span className="font-medium">超级个体工具箱</span>
+            <span className="font-medium">{config.SITE_TITLE}</span>
           </div>
           <ThemeToggle />
         </div>
@@ -93,7 +105,7 @@ export default function Navigation({ categories }: NavigationProps) {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-2">
             <Icons.Rocket className="w-5 h-5" />
-            <span className="font-medium">超级个体工具箱</span>
+            <span className="font-medium">{config.SITE_TITLE}</span>
           </div>
           <ThemeToggle />
         </div>
@@ -150,28 +162,7 @@ export default function Navigation({ categories }: NavigationProps) {
             )
           })}
         </ul>
-        {/* 社交媒体链接 */}
-        <div className="fixed bottom-8 left-8 flex space-x-4">
-          <a
-            href="https://github.com/moyuguy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            title="GitHub"
-          >
-            <Icons.Github className="w-5 h-5" />
-          </a>
-          <a
-            href="https://ezho.top"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            title="Blog"
-          >
-            <Icons.Newspaper className="w-5 h-5" />
-          </a>
-        </div>
       </nav>
     </>
   )
-} 
+}

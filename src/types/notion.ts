@@ -17,17 +17,6 @@ export interface WebsiteConfig {
     [key: string]: string;
 }
 
-export interface ConfigItem {
-    websiteUrl: string;
-    appearance: 'light' | 'dark' | 'auto';
-    revalidate: number;
-    linkCategoryLevels: string[];
-    linkPropertyTitle: string;
-    linkPropertyUrl: string;
-    linkPropertyIconUrl: string;
-    linkPropertyIconFile: string;
-}
-
 // 分类配置类型
 export interface Category {
   id: string;
