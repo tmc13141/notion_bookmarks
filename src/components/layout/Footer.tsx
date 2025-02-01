@@ -82,7 +82,7 @@ export default function Footer({ config }: FooterProps) {
               Built with Next.js and Notion
             </p>
             <p className="text-sm text-muted-foreground">
-              2024 <a href="https://ezho.top" target="_blank" className="hover:text-foreground transition-colors">Ezho</a>. All rights reserved.
+              2024 {config.SITE_AUTHOR}. All rights reserved.
             </p>
           </div>
         </div>
