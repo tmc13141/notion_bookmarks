@@ -2,10 +2,6 @@ import { Client } from "@notionhq/client";
 import { 
     PageObjectResponse,
     TitlePropertyItemObjectResponse,
-    CreatedTimePropertyItemObjectResponse,
-    MultiSelectPropertyItemObjectResponse,
-    UrlPropertyItemObjectResponse,
-    SelectPropertyItemObjectResponse,
     RichTextPropertyItemObjectResponse,
     FilesPropertyItemObjectResponse
 } from "@notionhq/client/build/src/api-endpoints";

@@ -4,7 +4,6 @@ import Navigation from '@/components/layout/Navigation';
 import { getLinks, getCategories, getWebsiteConfig } from '@/lib/notion';
 import AnimatedMain from '../components/AnimatedMain';
 import Footer from '@/components/layout/Footer';
-import { envConfig } from '@/config';
 
 export const revalidate = 43200; // 12小时重新验证一次
 

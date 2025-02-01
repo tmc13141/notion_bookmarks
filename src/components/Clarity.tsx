@@ -2,11 +2,11 @@
 
 import { useEffect } from 'react';
 
-declare global {
-  interface Window {
-    clarity: any;
-  }
-}
+// declare global {
+//   interface Window {
+//     clarity: any;
+//   }
+// }
 
 export function Clarity({ clarityId }: { clarityId: string }) {
   useEffect(() => {

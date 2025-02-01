@@ -5,9 +5,6 @@ import { cn } from '@/lib/utils'
 import ThemeToggle from '@/components/ThemeToggle'
 import * as Icons from 'lucide-react'
 import { WebsiteConfig } from '@/types/notion'
-import { FaGithub, FaXTwitter, FaWeibo, FaMessage } from 'react-icons/fa6'
-import { FaBlogger } from 'react-icons/fa'
-
 
 interface Category {
   id: string

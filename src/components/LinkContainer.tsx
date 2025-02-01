@@ -1,8 +1,7 @@
 // src/components/LinkContainer.tsx
 "use client";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React from "react";
 import LinkCard from "./LinkCard";
 import * as Icons from "lucide-react";
 import type { Link, Category } from '@/types/notion'; 
