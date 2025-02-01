@@ -6,7 +6,8 @@
 
 ## 项目预览
 > 🔗 [在线演示](https://portal.ezho.top/)
-![项目预览](https://github.com/user-attachments/assets/8d03bf56-5739-4172-86da-043cb61656c8)
+![项目预览](https://github.com/user-attachments/assets/1d864d20-44b3-4678-b649-6ba96821f1c4)
+
 
 
 ## 项目简介
