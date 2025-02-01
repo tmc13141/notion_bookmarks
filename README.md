@@ -6,8 +6,8 @@
 
 ## 项目预览
 > 🔗 [在线演示](https://portal.ezho.top/)
+![项目预览](https://github.com/user-attachments/assets/8d03bf56-5739-4172-86da-043cb61656c8)
 
-![项目预览](public/preview.png)
 
 ## 项目简介
 这是一个使用 Notion 作为数据库后端的个人导航网站项目。通过 Notion 数据库管理书签和导航链接，并以清晰现代的网页界面呈现。
@@ -57,8 +57,6 @@ GA_ID=可选的_google_分析_id
 
 ## Project Preview
 > 🔗 [Live Demo](https://portal.ezho.top/)
-
-![Project Preview](public/preview.png)
 
 ## Overview
 A personal navigation website using Notion as the database backend. This project allows you to manage your bookmarks and navigation links through Notion databases while presenting them in a clean, modern web interface.
