@@ -34,8 +34,19 @@ export default function LinkContainer({
     return acc;
   }, {} as Record<string, Record<string, Link[]>>);
 
+  const formatDate = (date: Date) => {
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).replace(/\//g, '-');
+  };
+
   return (
-    <div className="space-y-16">
+    <div className="space-y-16 pb-12">
       {categories.map((category) => {
         const categoryLinks = linksByCategory[category.name];
         if (!categoryLinks) return null;
@@ -86,6 +97,9 @@ export default function LinkContainer({
           </section>
         );
       })}
+      <div className="mt-12 text-center text-sm text-muted-foreground">
+        最近更新：{formatDate(new Date())}
+      </div>
     </div>
   );
 }

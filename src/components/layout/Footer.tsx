@@ -78,7 +78,7 @@ export default function Footer({ config }: FooterProps) {
             )}
           </div>
           <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="hidden md:block text-sm text-muted-foreground">
               Built with Next.js and Notion
             </p>
             <p className="text-sm text-muted-foreground">
