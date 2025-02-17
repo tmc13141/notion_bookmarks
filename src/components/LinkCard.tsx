@@ -70,7 +70,7 @@ export default function LinkCard({ link, className }: LinkCardProps) {
 
   return (
     <>
-      <motion.a
+    <motion.a
         href={link.url}
         target="_blank"
         rel="noopener noreferrer"
@@ -83,6 +83,7 @@ export default function LinkCard({ link, className }: LinkCardProps) {
           hover:shadow-lg hover:shadow-primary/5
           bg-card/50 backdrop-blur-sm
           h-[160px] min-w-[280px]
+          overflow-hidden
           ${className || ''}
         `}
       >
