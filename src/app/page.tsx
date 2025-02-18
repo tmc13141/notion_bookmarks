@@ -67,6 +67,7 @@ export default async function HomePage() {
                 initialLinks={processedLinks} 
                 enabledCategories={enabledCategories}
                 categories={activeCategories}
+                lastGeneratedTime={new Date()}
               />
             </div>
           </div>

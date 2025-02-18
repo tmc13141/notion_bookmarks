@@ -10,12 +10,14 @@ interface LinkContainerProps {
   initialLinks: Link[];
   enabledCategories: Set<string>;
   categories: Category[];
+  lastGeneratedTime?: Date;
 }
 
 export default function LinkContainer({
   initialLinks,
   enabledCategories,
   categories,
+  lastGeneratedTime = new Date(),
 }: LinkContainerProps) {
   // 按一级和二级分类组织链接，只包含启用的分类
   const linksByCategory = initialLinks.reduce((acc, link) => {
@@ -98,7 +100,7 @@ export default function LinkContainer({
         );
       })}
       <div className="mt-12 text-center text-sm text-muted-foreground">
-        最近更新：{formatDate(new Date())}
+        最近更新：{formatDate(lastGeneratedTime)}
       </div>
     </div>
   );
