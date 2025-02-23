@@ -21,7 +21,7 @@
 - 一键部署到 Vercel
 
 ## 快速开始
-[保姆级教程](https://lofty-spear-6f1.notion.site/Notion-Bookmarks-1a1a26d324f3809695a1fea1adbca3a5)
+[保姆级教程](https://ezho.top/code/2025/02/21/notion-bookmarks-handbook)
 
 </div>
 
