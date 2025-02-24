@@ -84,38 +84,48 @@ const getIconUrl = (page: any): string => {
 // 获取网址链接
 export const getLinks = cache(async () => {
     const databaseId = envConfig.NOTION_LINKS_DB_ID!;
+    const allLinks = [];
+    let hasMore = true;
+    let nextCursor: string | undefined;
     
     try {
-        const response = await notion.databases.query({
-            database_id: databaseId,
-            sorts: [
-                {
-                    property: 'category1',
-                    direction: 'ascending',
-                },
-                {
-                    property: 'category2',
-                    direction: 'ascending',
-                },
-            ],
-        });
+        while (hasMore) {
+            const response = await notion.databases.query({
+                database_id: databaseId,
+                start_cursor: nextCursor,
+                sorts: [
+                    {
+                        property: 'category1',
+                        direction: 'ascending',
+                    },
+                    {
+                        property: 'category2',
+                        direction: 'ascending',
+                    },
+                ],
+            });
 
-        const links = response.results.map((page: any) => ({
-            id: page.id,
-            name: page.properties.Name?.title[0]?.plain_text || '未命名',
-            created: page.properties.Created?.created_time || '',
-            desc: page.properties.desc?.rich_text[0]?.plain_text || '',
-            url: page.properties.URL?.url || '#',
-            category1: page.properties.category1?.select?.name || '未分类',
-            category2: page.properties.category2?.select?.name || '默认',
-            iconfile: page.properties.iconfile?.files?.[0]?.file?.url || '',
-            iconlink: page.properties.iconlink?.url || '',
-            tags: page.properties.Tags?.multi_select?.map((tag: any) => tag.name) || [],
-        }));
+            const links = response.results.map((page: any) => ({
+                id: page.id,
+                name: page.properties.Name?.title[0]?.plain_text || '未命名',
+                created: page.properties.Created?.created_time || '',
+                desc: page.properties.desc?.rich_text[0]?.plain_text || '',
+                url: page.properties.URL?.url || '#',
+                category1: page.properties.category1?.select?.name || '未分类',
+                category2: page.properties.category2?.select?.name || '默认',
+                iconfile: page.properties.iconfile?.files?.[0]?.file?.url || '',
+                iconlink: page.properties.iconlink?.url || '',
+                tags: page.properties.Tags?.multi_select?.map((tag: any) => tag.name) || [],
+            }));
+
+            allLinks.push(...links);
+            hasMore = response.has_more;
+            nextCursor = response.next_cursor || undefined;
+        }
 
         // 对链接进行排序：先按是否置顶，再按创建时间
-        links.sort((a, b) => {
-            // 检查是否包含"力荐👍"标签
+        allLinks.sort((a, b) => {
+            // 检查是否包含"力荐👍"
             const aIsTop = a.tags.includes('力荐👍');
             const bIsTop = b.tags.includes('力荐👍');
             
@@ -128,7 +138,7 @@ export const getLinks = cache(async () => {
             return new Date(b.created).getTime() - new Date(a.created).getTime();
         });
 
-        return links;
+        return allLinks;
     } catch (error) {
         console.error('Error fetching links:', error);
         return [];
