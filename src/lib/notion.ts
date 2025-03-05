@@ -195,7 +195,8 @@ export const getWebsiteConfig = cache(async () => {
             SITE_FOOTER: configMap.SITE_FOOTER ?? '',
             SITE_FAVICON: favicon,
             // 主题配置
-            // APPEARANCE: configMap.APPEARANCE ?? 'auto',
+            THEME_NAME: configMap.THEME_NAME ?? 'simple',
+            SHOW_THEME_SWITCHER: configMap.SHOW_THEME_SWITCHER ?? 'true',
 
             // 社交媒体配置
             SOCIAL_GITHUB: configMap.SOCIAL_GITHUB ?? '',

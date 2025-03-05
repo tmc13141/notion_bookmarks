@@ -4,6 +4,13 @@
 
 <div id="chinese">
 
+## 更新说明
+### 2025/3/7
+在 Website Configuration 数据库中，你可以配置网站的主题。目前支持两种主题：
+- Simple：简约现代风格
+- Cyberpunk：赛博朋克风格，带有霓虹效果和科技感的暗色主题
+- 新增了一个新的主题：Cyberpunk，带有霓虹效果和科技感的暗色主题。
+
 ## 项目预览
 > 🔗 [在线演示](https://portal.ezho.top/)
 ![项目预览](https://github.com/user-attachments/assets/1d864d20-44b3-4678-b649-6ba96821f1c4)
@@ -18,6 +25,7 @@
 - 清晰现代的网页界面
 - 支持多级分类导航
 - 响应式设计，支持桌面和移动端
+- 支持多主题切换（简约主题、赛博朋克主题）
 - 一键部署到 Vercel
 
 ## 快速开始
@@ -38,15 +46,20 @@ A personal navigation website using Notion as the database backend. This project
 - Clean and modern web interface
 - Multi-level category navigation
 - Responsive design for desktop and mobile
+- Multiple theme support (Simple theme, Cyberpunk theme)
 - One-click deployment to Vercel
 
 ## Quick Start
 
 ### 1. Copy Notion Template
 Directly copy this [Notion template](https://lofty-spear-6f1.notion.site/NotionBookmarks-157a26d324f380c08811f044c8563d04) to your workspace. The template includes three databases:
-- **Website Configuration**: Stores basic website information and settings
+- **Website Configuration**: Stores basic website information and settings, including theme configuration
 - **Navigation Links**: Stores all bookmark entries
 - **Category Configuration**: Manages navigation categories
+
+In the Website Configuration database, you can configure the website theme. Currently, two themes are supported:
+- Simple: Clean and modern style
+- Cyberpunk: A dark theme with neon effects and a tech-inspired aesthetic
 
 ### 2. Create Notion Integration
 1. Visit [Notion Developers](https://www.notion.so/my-integrations) to create a new integration

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import ThemeToggle from '@/components/ThemeToggle'
+import ThemeSwitcher from '@/components/ThemeSwitcher'
 import * as Icons from 'lucide-react'
 import { WebsiteConfig } from '@/types/notion'
 
@@ -70,10 +70,10 @@ export default function Navigation({ categories, config = defaultConfig }: Navig
       <nav className="lg:hidden fixed top-0 left-0 right-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center space-x-2">
-            <Icons.Rocket className="w-5 h-5" />
-            <span className="font-medium">{config.SITE_TITLE}</span>
+            <Icons.Rocket className="w-5 h-5 text-foreground" />
+            <span className="font-medium text-foreground">{config.SITE_TITLE}</span>
           </div>
-          <ThemeToggle />
+          {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
         </div>
         <div className="overflow-x-auto flex items-center h-12 border-t scrollbar-none">
           <div className="flex px-4 min-w-full">
@@ -85,7 +85,7 @@ export default function Navigation({ categories, config = defaultConfig }: Navig
                   className={cn(
                     "whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors shrink-0",
                     activeCategory === category.id
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-primary text-white font-medium"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent"
                   )}
                 >
@@ -101,10 +101,10 @@ export default function Navigation({ categories, config = defaultConfig }: Navig
       <nav className="hidden lg:block w-[280px] flex-shrink-0 h-screen sticky top-0 p-4 overflow-y-auto border-r">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-2">
-            <Icons.Rocket className="w-5 h-5" />
-            <span className="font-medium">{config.SITE_TITLE}</span>
+            <Icons.Rocket className="w-5 h-5 text-foreground" />
+            <span className="font-medium text-foreground">{config.SITE_TITLE}</span>
           </div>
-          <ThemeToggle />
+          {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
         </div>
         <ul className="space-y-1">
           {categories.map((category) => {
@@ -144,7 +144,7 @@ export default function Navigation({ categories, config = defaultConfig }: Navig
                             className={cn(
                               "w-full text-left px-4 py-2 rounded-lg transition-colors text-sm",
                               activeCategory === `${category.id}-${subCategory.id}`
-                                ? "bg-primary text-primary-foreground"
+                                ? "bg-primary text-white font-medium"
                                 : "text-muted-foreground hover:text-foreground hover:bg-accent"
                             )}
                           >

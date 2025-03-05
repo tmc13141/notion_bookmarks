@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Clarity } from "@/components/Clarity";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+
 import { getWebsiteConfig } from "@/lib/notion";
 import { mergeConfig } from "@/config";
 import "./globals.css";
@@ -85,10 +86,11 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
         <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
+          attribute="data-theme"
+          defaultTheme={config.THEME_NAME ? `${config.THEME_NAME}-light` : 'simple-light'}
+          enableSystem={false}
           disableTransitionOnChange
+          storageKey="theme"
         >
           {children}
         </ThemeProvider>

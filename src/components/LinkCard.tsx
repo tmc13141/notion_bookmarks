@@ -115,9 +115,9 @@ export default function LinkCard({ link, className }: LinkCardProps) {
                 onMouseEnter={(e) => handleMouseEnter(e, setTitleTooltip)}
                 onMouseLeave={() => handleMouseLeave(setTitleTooltip)}
               >
-                <h3 className="text-lg font-medium text-foreground/90
-                             group-hover:text-primary
-                             transition-colors line-clamp-1 pr-6">
+                <h3 className="text-lg text-foreground
+                               group-hover:text-primary
+                               transition-colors line-clamp-1 pr-6">
                   {link.name}
                 </h3>
               </div>
@@ -137,8 +137,8 @@ export default function LinkCard({ link, className }: LinkCardProps) {
               onMouseEnter={(e) => handleMouseEnter(e, setDescTooltip)}
               onMouseLeave={() => handleMouseLeave(setDescTooltip)}
             >
-              <p className="text-sm text-muted-foreground
-                         group-hover:text-foreground/80
+              <p className="text-sm text-foreground/80
+                         group-hover:text-foreground
                          line-clamp-2 transition-colors">
                 {link.desc}
               </p>

@@ -1,0 +1,9 @@
+/* 主题样式统一导入文件 */
+
+/* 导入思源黑体 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+/* 导入各个主题样式 */
+@import '../themes/simple/style.css';
+@import '../themes/cyberpunk/style.css';
+@import '../themes/base.css';
