@@ -32,6 +32,9 @@ export type Config = typeof defaultConfig & {
     // 添加可选的运行时配置项
     CLARITY_ID?: string;
     GA_ID?: string;
+    // 主题配置
+    THEME_NAME?: string;
+    SHOW_THEME_SWITCHER?: string;
 };
 
 // 合并配置
