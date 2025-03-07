@@ -108,7 +108,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     <NextThemesProvider 
       {...props} 
       attribute="data-theme"
-      onThemeChange={handleThemeChange}
+      defaultTheme={props.defaultTheme || 'simple-light'}
     >
       {children}
     </NextThemesProvider>
