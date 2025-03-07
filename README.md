@@ -5,11 +5,12 @@
 <div id="chinese">
 
 ## 更新说明
-### 2025/3/7
-在 Website Configuration 数据库中，你可以配置网站的主题。目前支持两种主题：
-- Simple：简约现代风格
-- Cyberpunk：赛博朋克风格，带有霓虹效果和科技感的暗色主题
-- 新增了一个新的主题：Cyberpunk，带有霓虹效果和科技感的暗色主题。
+🎉更新内容及更新方法见[保姆级教程](https://ezho.top/code/2025/02/21/notion-bookmarks-handbook)
+<details>
+  <summary> 2025/3/7</summary>
+ - 2025/3/7 新增主题配置，新增赛博朋克主题 </br>
+  <img width="800" alt="demo" src="https://github.com/user-attachments/assets/c94456fc-fc4f-4d10-bd64-1a0df53af1ba" />
+</details>
 
 ## 项目预览
 > 🔗 [在线演示](https://portal.ezho.top/)
