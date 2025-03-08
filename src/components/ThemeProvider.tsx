@@ -58,16 +58,16 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     applyThemeStyles();
     
     // 监听主题变化事件
-    const handleThemeChange = () => {
+    const handleThemeChangeEvent = () => {
       requestAnimationFrame(() => {
         applyThemeStyles();
       });
     };
     
-    window.addEventListener('themeChange', handleThemeChange);
+    window.addEventListener('themeChange', handleThemeChangeEvent);
     
     return () => {
-      window.removeEventListener('themeChange', handleThemeChange);
+      window.removeEventListener('themeChange', handleThemeChangeEvent);
     };
   }, [applyThemeStyles]);
 
