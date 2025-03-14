@@ -12,4 +12,4 @@ export default function AnimatedMain({ children }: { children: React.ReactNode }
       {children}
     </motion.main>
   )
-} 
+}

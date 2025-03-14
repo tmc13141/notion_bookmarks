@@ -97,6 +97,63 @@
   font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
 }
 
+/* SimpleTime组件样式 */
+[data-theme="cyberpunk-dark"] .simple-time-widget {
+  position: relative;
+  box-shadow: var(--card-glow);
+  border: none;
+  background: linear-gradient(135deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  border-radius: 0;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: linear-gradient(135deg, hsl(320, 100%, 65%), hsl(190, 100%, 60%));
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget .text-primary {
+  color: hsl(190, 100%, 60%);
+  text-shadow: var(--text-glow), 0 0 20px hsl(190, 100%, 60%);
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.1em;
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget:hover {
+  box-shadow: var(--card-glow-hover);
+  transform: translateY(-3px);
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget .text-lg {
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget .text-base,
+[data-theme="cyberpunk-dark"] .simple-time-widget .text-xs {
+  font-family: 'Rajdhani', sans-serif;
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget .mt-2 {
+  margin-top: 0.5rem;
+  border-top: 1px solid hsla(320, 100%, 65%, 0.3);
+  padding-top: 0.5rem;
+}
+
 /* 图标容器样式 - 移除边框 */
 [data-theme="cyberpunk-dark"] .icon-container,
 [data-theme="cyberpunk-dark"] .group .relative.w-10.h-10 {
@@ -142,10 +199,149 @@
                  1px 1px 0 hsl(190, 100%, 60%),
                  0 0 20px hsl(320, 100%, 65%);
   }
-  51% {
-    text-shadow: 1px 1px 0 hsl(320, 100%, 65%),
-                -1px -1px 0 hsl(190, 100%, 60%),
-                0 0 30px hsl(320, 100%, 65%);
+  100% {
+    text-shadow: 0 0 10px hsl(320, 100%, 65%),
+                 0 0 20px hsl(320, 100%, 65%),
+                 0 0 30px hsl(320, 100%, 65%);
+  }
+}
+
+/* Weather组件样式 */
+[data-theme="cyberpunk-dark"] .weather-widget {
+  background: linear-gradient(135deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
+  box-shadow: var(--card-glow);
+  border-radius: 0;
+  border: none;
+  position: relative;
+}
+
+[data-theme="cyberpunk-dark"] .weather-widget::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: linear-gradient(135deg, hsl(320, 100%, 65%), hsl(190, 100%, 60%));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+[data-theme="cyberpunk-dark"] .weather-widget:hover {
+  box-shadow: var(--card-glow-hover);
+  transform: translateY(-3px);
+}
+
+[data-theme="cyberpunk-dark"] .weather-widget h3 {
+  text-shadow: var(--text-glow), 0 0 20px hsl(320, 100%, 65%);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+[data-theme="cyberpunk-dark"] .weather-widget .weather-icon {
+  text-shadow: 0 0 15px currentColor;
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget {
+  position: relative;
+  box-shadow: var(--card-glow);
+  border: none;
+  background: linear-gradient(135deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  border-radius: 0;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: linear-gradient(135deg, hsl(320, 100%, 65%), hsl(190, 100%, 60%));
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget .text-primary {
+  color: hsl(190, 100%, 60%);
+  text-shadow: var(--text-glow), 0 0 20px hsl(190, 100%, 60%);
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.1em;
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget:hover {
+  box-shadow: var(--card-glow-hover);
+  transform: translateY(-3px);
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget .text-lg {
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget .text-base,
+[data-theme="cyberpunk-dark"] .simple-time-widget .text-xs {
+  font-family: 'Rajdhani', sans-serif;
+}
+
+[data-theme="cyberpunk-dark"] .simple-time-widget .mt-2 {
+  margin-top: 0.5rem;
+  border-top: 1px solid hsla(320, 100%, 65%, 0.3);
+  padding-top: 0.5rem;
+}
+
+/* 图标容器样式 - 移除边框 */
+[data-theme="cyberpunk-dark"] .icon-container,
+[data-theme="cyberpunk-dark"] .group .relative.w-10.h-10 {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: var(--text-glow);
+}
+
+/* 导航组件样式 */
+[data-theme="cyberpunk-dark"] nav {
+  background: linear-gradient(180deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
+  border-color: hsl(320, 100%, 65%);
+  box-shadow: var(--border-glow);
+}
+
+[data-theme="cyberpunk-dark"] nav span,
+[data-theme="cyberpunk-dark"] nav button {
+  color: var(--foreground);
+  font-family: 'Orbitron', 'Noto Sans SC', sans-serif;
+  text-shadow: var(--text-glow);
+}
+
+/* 导航标题特殊样式 */
+[data-theme="cyberpunk-dark"] nav span.font-medium {
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px hsl(320, 100%, 65%),
+               0 0 20px hsl(320, 100%, 65%),
+               0 0 30px hsl(320, 100%, 65%);
+  position: relative;
+  animation: textGlitch 3s infinite;
+}
+
+@keyframes textGlitch {
+  0% {
+    text-shadow: 0 0 10px hsl(320, 100%, 65%),
+                 0 0 20px hsl(320, 100%, 65%),
+                 0 0 30px hsl(320, 100%, 65%);
+  }
+  50% {
+    text-shadow: -1px -1px 0 hsl(320, 100%, 65%),
+                 1px 1px 0 hsl(190, 100%, 60%),
+                 0 0 20px hsl(320, 100%, 65%);
   }
   100% {
     text-shadow: 0 0 10px hsl(320, 100%, 65%),
@@ -228,4 +424,27 @@
     z-index: -1;
     pointer-events: none;
   }
+}
+
+/* 天气组件样式 */
+[data-theme="cyberpunk-dark"] .weather-widget {
+  background: linear-gradient(135deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
+  box-shadow: var(--card-glow);
+  border-radius: 0;
+  border: none;
+  position: relative;
+}
+
+[data-theme="cyberpunk-dark"] .weather-widget::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: linear-gradient(135deg, hsl(320, 100%, 65%), hsl(190, 100%, 60%));
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }

@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { Clarity } from "@/components/Clarity";
-import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { ThemeProvider } from "@/components/ui/ThemeProvider";
+import { Clarity } from "@/components/analytics/Clarity";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 
 import { getWebsiteConfig } from "@/lib/notion";
 import { mergeConfig } from "@/config";
 import "./globals.css";
+import "qweather-icons/font/qweather-icons.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

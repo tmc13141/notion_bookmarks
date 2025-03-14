@@ -82,3 +82,32 @@
 [data-theme^="simple"] .desktop-nav button {
   transition: all 0.2s ease-out;
 }
+
+/* SimpleTime组件样式 */
+[data-theme^="simple"] .simple-time-widget {
+  font-family: 'Noto Sans SC', var(--font-family);
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease-out;
+}
+
+[data-theme^="simple"] .simple-time-widget:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+[data-theme^="simple"] .simple-time-widget .text-primary {
+  color: var(--primary);
+}
+
+/* Weather组件样式 */
+[data-theme^="simple"] .weather-widget {
+  border-radius: var(--radius);
+  transition: all 0.2s ease-out;
+}
+
+[data-theme^="simple"] .weather-widget:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}

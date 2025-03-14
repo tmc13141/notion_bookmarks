@@ -1,9 +1,11 @@
 // src/app/page.tsx
-import LinkContainer from '@/components/LinkContainer';
+import LinkContainer from '@/components/layout/LinkContainer';
 import Navigation from '@/components/layout/Navigation';
 import { getLinks, getCategories, getWebsiteConfig } from '@/lib/notion';
-import AnimatedMain from '../components/AnimatedMain';
+import AnimatedMain from '@/components/layout/AnimatedMain';
 import Footer from '@/components/layout/Footer';
+import {SimpleTime,AnalogClock,Weather,IPInfo} from '@/components/widgets';
+import WidgetsContainer from '@/components/layout/WidgetsContainer';
 
 export const revalidate = 43200; // 12小时重新验证一次
 
@@ -63,6 +65,14 @@ export default async function HomePage() {
         <AnimatedMain>
           <div className="flex-1 w-full px-4 py-8 lg:py-12 mt-28 lg:mt-0 pb-24">
             <div className="max-w-[2000px] mx-auto">
+              {/* 使用WidgetsContainer组件包裹小组件 */}
+              <WidgetsContainer>
+                <SimpleTime />
+                <AnalogClock />
+                <Weather />
+                <IPInfo />
+              </WidgetsContainer>
+              
               <LinkContainer 
                 initialLinks={processedLinks} 
                 enabledCategories={enabledCategories}
