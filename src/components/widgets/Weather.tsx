@@ -139,6 +139,8 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
             
             if (ipResponse.ok) {
               const ipData = await ipResponse.json();
+              console.log('IP定位返回数据:', ipData); // 添加日志以便调试
+              
               if (ipData.location && ipData.location !== '未知位置') {
                 location = ipData.location;
                 locationSource = 'IP定位';
@@ -146,12 +148,16 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
                 if (ipData.latitude && ipData.longitude) {
                   latitude = ipData.latitude;
                   longitude = ipData.longitude;
+                  console.log(`成功获取IP定位的经纬度: ${latitude}, ${longitude}`);
                 }
+              } else if (ipData.error) {
+                console.warn('IP定位返回错误:', ipData.error);
+                throw new Error(ipData.error);
               } else {
-                throw new Error('IP定位失败');
+                throw new Error('IP定位未返回有效位置');
               }
             } else {
-              throw new Error('IP服务请求失败');
+              throw new Error(`IP服务请求失败: ${ipResponse.status}`);
             }
           } catch (ipError) {
             console.log('IP定位失败，使用默认城市', ipError);

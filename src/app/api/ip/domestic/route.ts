@@ -31,17 +31,21 @@ export async function GET(req: NextRequest) {
         ip: data.ip || ip,
         location: data.city ? `${data.city}${data.region ? ', ' + data.region : ''}` : '未知位置',
         country: data.country_name || '未知国家',
-        region: data.region || '未知地区'
+        region: data.region || '未知地区',
+        latitude: data.latitude,
+        longitude: data.longitude
       })
     },
     {
       name: 'ip-api.com',
-      url: `http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,message,country,regionName,city,query`,
+      url: `http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,message,country,regionName,city,query,lat,lon&lang=zh-CN`,
       transform: (data: any) => ({
         ip: data.query || ip,
         location: data.city ? `${data.city}${data.regionName ? ', ' + data.regionName : ''}` : '未知位置',
         country: data.country || '未知国家',
-        region: data.regionName || '未知地区'
+        region: data.regionName || '未知地区',
+        latitude: data.lat,
+        longitude: data.lon
       })
     }
   ];
