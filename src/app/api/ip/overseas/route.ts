@@ -4,7 +4,6 @@ export async function GET(req: NextRequest) {
   // 获取用户的真实IP地址
   let ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 
            req.headers.get('x-real-ip') || 
-           req.ip || 
            '未知IP';
   
   // 检查是否是本地开发环境中的保留IP地址
