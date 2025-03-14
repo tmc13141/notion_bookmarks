@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface ServiceError extends Error {
+  message: string;
+}
+
 export async function GET(req: NextRequest) {
   // 获取用户的真实IP地址
   let ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 
@@ -42,7 +46,7 @@ export async function GET(req: NextRequest) {
     }
   ];
 
-  let lastError = null;
+  let lastError: ServiceError | null = null;
 
   // 依次尝试每个服务
   for (const service of services) {
