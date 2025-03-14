@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     // 获取城市ID
     console.log(`开始请求城市查询API...`);
     const locationResponse = await fetch(
-      `https://geoapi.qweather.com/v2/city/lookup?location=${encodeURIComponent(locationParam)}&key=${apiKey}`
+      `https://geoapi.qweather.com/v2/city/lookup?location=${encodeURIComponent(locationParam || '')}&key=${apiKey}`
     );
     
     if (!locationResponse.ok) {

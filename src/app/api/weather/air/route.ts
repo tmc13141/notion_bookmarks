@@ -93,8 +93,8 @@ export async function GET(request: Request) {
     }
     
     // 优先使用US-EPA标准，如果没有则使用QAQI
-    const usEpaIndex = airData.indexes.find(index => index.code === 'us-epa');
-    const qaqiIndex = airData.indexes.find(index => index.code === 'qaqi');
+    const usEpaIndex = airData.indexes.find((index: { code: string }) => index.code === 'us-epa');
+    const qaqiIndex = airData.indexes.find((index: { code: string }) => index.code === 'qaqi');
     
     // 使用找到的第一个指数，优先US-EPA
     const aqiIndex = usEpaIndex || qaqiIndex || airData.indexes[0];

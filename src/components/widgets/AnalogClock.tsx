@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 export default function AnalogClock() {
   // Initialize with null to avoid hydration mismatch
-  const [time, setTime] = useState(null);
+  const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
     // Set initial time only on client side

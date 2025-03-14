@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(result, { status: 200 });
     } catch (error) {
       console.error(`使用 ${service.name} 获取IP信息失败:`, error);
-      lastError = error;
+      lastError = error as ServiceError;
       // 继续尝试下一个服务
     }
   }

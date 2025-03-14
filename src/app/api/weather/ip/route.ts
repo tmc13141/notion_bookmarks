@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface ServiceError extends Error {
+  message: string;
+}
+
 export async function GET(request: NextRequest) {
   try {
     // 使用免费的IP定位服务
@@ -18,8 +22,9 @@ export async function GET(request: NextRequest) {
     );
   } catch (error) {
     console.error('IP定位失败:', error);
+    const serviceError = error as ServiceError;
     return NextResponse.json(
-      { error: 'IP定位失败', location: '未知位置' },
+      { error: `IP定位失败: ${serviceError.message}`, location: '未知位置' },
       { status: 500 }
     );
   }
