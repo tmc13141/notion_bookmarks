@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+// 定义错误类型接口
+interface ServiceError extends Error {
+  message: string;
+}
 
 export async function GET(req: NextRequest) {
   // 获取用户的真实IP地址
@@ -42,7 +46,7 @@ export async function GET(req: NextRequest) {
     }
   ];
 
-  let lastError = null;
+  let lastError: ServiceError | null = null;
 
   // 依次尝试每个服务
   for (const service of services) {
@@ -74,7 +78,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(result, { status: 200 });
     } catch (error) {
       console.error(`使用 ${service.name} 获取IP信息失败:`, error);
-      lastError = error;
+      lastError = error as ServiceError;
       // 继续尝试下一个服务
     }
   }
