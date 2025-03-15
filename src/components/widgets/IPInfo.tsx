@@ -135,13 +135,16 @@ export default function IPInfo() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="ip-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[200px] h-[150px] flex flex-col justify-between"
+        className="ip-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[200px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
       >
-        <div>
+        {/* 背景装饰 - 主题感知 */}
+        <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
+        
+        <div className="relative z-10">
           <h3 className="text-xl font-medium text-destructive">获取失败</h3>
         </div>
         
-        <div className="mt-2">
+        <div className="mt-2 relative z-10">
           <p className="text-sm text-muted-foreground break-words overflow-hidden line-clamp-3">{error}</p>
           <button 
             onClick={fetchIPData} 
@@ -193,15 +196,15 @@ export default function IPInfo() {
               {ipData?.domestic.error ? (
                 <span className="text-destructive">获取失败</span>
               ) : (
-                <span className="font-medium text-foreground">{ipData?.domestic.ip}</span>
+                <span className="font-medium text-foreground truncate max-w-[120px]">{ipData?.domestic.ip}</span>
               )}
             </div>
-            <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
-              <span className="inline-block w-10">位置:</span>
+            <div className="flex items-start gap-1 text-muted-foreground mt-0.5">
+              <span className="inline-block w-10 shrink-0">位置:</span>
               {ipData?.domestic.error ? (
                 <span className="text-xs text-destructive/80" title={ipData?.domestic.error}>服务不可用</span>
               ) : (
-                <span>{ipData?.domestic.location || '未知'}</span>
+                <span className="truncate max-w-[120px]" title={ipData?.domestic.location || '未知'}>{ipData?.domestic.location || '未知'}</span>
               )}
             </div>
           </div>
@@ -213,15 +216,15 @@ export default function IPInfo() {
               {ipData?.overseas.error ? (
                 <span className="text-destructive">获取失败</span>
               ) : (
-                <span className="font-medium text-foreground">{ipData?.overseas.ip}</span>
+                <span className="font-medium text-foreground truncate max-w-[120px]">{ipData?.overseas.ip}</span>
               )}
             </div>
-            <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
-              <span className="inline-block w-10">位置:</span>
+            <div className="flex items-start gap-1 text-muted-foreground mt-0.5">
+              <span className="inline-block w-10 shrink-0">位置:</span>
               {ipData?.overseas.error ? (
                 <span className="text-xs text-destructive/80" title={ipData?.overseas.error}>服务不可用</span>
               ) : (
-                <span>{ipData?.overseas.location || '未知'}</span>
+                <span className="truncate max-w-[120px]" title={ipData?.overseas.location || '未知'}>{ipData?.overseas.location || '未知'}</span>
               )}
             </div>
           </div>

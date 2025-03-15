@@ -38,9 +38,9 @@ const aqiCategoryMap: Record<string, string> = {
   'Good': '优',
   'Moderate': '良',
   'Unhealthy for Sensitive Groups': '轻度污染',
-  'Unhealthy': '不健康',
-  'Very Unhealthy': '非常不健康',
-  'Hazardous': '危险',
+  'Unhealthy': '中度污染',
+  'Very Unhealthy': '重度污染',
+  'Hazardous': '严重污染',
   'Excellent': '优'
 };
 
@@ -51,15 +51,23 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
   const [showCitySelector, setShowCitySelector] = useState(false);
   const [customCity, setCustomCity] = useState('');
   const [currentCity, setCurrentCity] = useState(defaultCity);
+  const [savedCity, setSavedCity] = useState<string | null>(null);
   const cityInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
-  // 客户端渲染时设置portal容器
+  // 客户端渲染时设置portal容器并获取保存的城市
   useEffect(() => {
     setPortalContainer(document.body);
+    
+    // 从localStorage获取保存的城市
+    const storedCity = localStorage.getItem('weatherCity');
+    if (storedCity) {
+      setSavedCity(storedCity);
+      setCurrentCity(storedCity);
+    }
   }, []);
 
   // 关键修复：修改点击外部关闭菜单的逻辑
@@ -103,66 +111,78 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
       let longitude: number | null = null;
       
       if (city === 'auto') {
-        location = defaultCity;
-        locationSource = '默认城市';
-        
-        try {
-          if (navigator.geolocation) {
-            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, {
-                timeout: 10000,
-                maximumAge: 600000 // 10分钟缓存
-              });
-            });
-            
-            // 使用经纬度获取城市信息
-            latitude = position.coords.latitude;
-            longitude = position.coords.longitude;
-            const geoResponse = await fetch(`/api/weather/geo?lat=${latitude}&lon=${longitude}`);
-            
-            if (!geoResponse.ok) throw new Error('无法获取位置信息');
-            
-            const geoData = await geoResponse.json();
-            if (geoData.location && geoData.location !== '未知位置') {
-              location = geoData.location;
-              locationSource = '位置服务';
-            } else {
-              throw new Error('位置解析失败');
-            }
-          }
-        } catch (geoError) {
-          console.log('地理位置获取失败，尝试IP定位', geoError);
+        // 优先使用保存的城市
+        if (savedCity) {
+          location = savedCity;
+          locationSource = '记忆城市';
+        } else {
+          location = defaultCity;
+          locationSource = '默认城市';
           
-          // 尝试IP定位
           try {
-            const ipResponse = await fetch('/api/weather/ip');
-            
-            if (ipResponse.ok) {
-              const ipData = await ipResponse.json();
-              console.log('IP定位返回数据:', ipData); // 添加日志以便调试
+            if (navigator.geolocation) {
+              const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                  timeout: 10000,
+                  maximumAge: 600000 // 10分钟缓存
+                });
+              });
               
-              if (ipData.location && ipData.location !== '未知位置') {
-                location = ipData.location;
-                locationSource = 'IP定位';
-                // 如果IP定位返回了经纬度，保存下来
-                if (ipData.latitude && ipData.longitude) {
-                  latitude = ipData.latitude;
-                  longitude = ipData.longitude;
-                  console.log(`成功获取IP定位的经纬度: ${latitude}, ${longitude}`);
-                }
-              } else if (ipData.error) {
-                console.warn('IP定位返回错误:', ipData.error);
-                throw new Error(ipData.error);
+              // 使用经纬度获取城市信息
+              latitude = position.coords.latitude;
+              longitude = position.coords.longitude;
+              const geoResponse = await fetch(`/api/weather/geo?lat=${latitude}&lon=${longitude}`);
+              
+              if (!geoResponse.ok) throw new Error('无法获取位置信息');
+              
+              const geoData = await geoResponse.json();
+              if (geoData.location && geoData.location !== '未知位置') {
+                location = geoData.location;
+                locationSource = '位置服务';
               } else {
-                throw new Error('IP定位未返回有效位置');
+                throw new Error('位置解析失败');
               }
-            } else {
-              throw new Error(`IP服务请求失败: ${ipResponse.status}`);
             }
-          } catch (ipError) {
-            console.log('IP定位失败，使用默认城市', ipError);
-            // 使用默认城市
+          } catch (geoError) {
+            console.log('地理位置获取失败，尝试IP定位', geoError);
+            
+            // 尝试IP定位
+            try {
+              const ipResponse = await fetch('/api/weather/ip');
+              
+              if (ipResponse.ok) {
+                const ipData = await ipResponse.json();
+                console.log('IP定位返回数据:', ipData); // 添加日志以便调试
+                
+                if (ipData.location && ipData.location !== '未知位置') {
+                  location = ipData.location;
+                  locationSource = 'IP定位';
+                  // 如果IP定位返回了经纬度，保存下来
+                  if (ipData.latitude && ipData.longitude) {
+                    latitude = ipData.latitude;
+                    longitude = ipData.longitude;
+                    console.log(`成功获取IP定位的经纬度: ${latitude}, ${longitude}`);
+                  }
+                } else if (ipData.error) {
+                  console.warn('IP定位返回错误:', ipData.error);
+                  throw new Error(ipData.error);
+                } else {
+                  throw new Error('IP定位未返回有效位置');
+                }
+              } else {
+                throw new Error(`IP服务请求失败: ${ipResponse.status}`);
+              }
+            } catch (ipError) {
+              console.log('IP定位失败，使用默认城市', ipError);
+              // 使用默认城市
+            }
           }
+        }
+      } else {
+        // 如果是手动选择的城市，保存到localStorage
+        if (city !== 'auto' && city !== defaultCity) {
+          localStorage.setItem('weatherCity', city);
+          setSavedCity(city);
         }
       }
       
@@ -293,7 +313,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[200px] h-[150px] flex items-center justify-center"
+        className="weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex items-center justify-center"
       >
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
@@ -310,9 +330,12 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[200px] h-[150px] flex flex-col justify-between"
+        className="weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
       >
-        <div className="flex justify-between items-start">
+        {/* 背景装饰 - 主题感知 */}
+        <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
+        
+        <div className="flex justify-between items-start relative z-10">
           <div>
             <h3 className="text-xl font-medium text-destructive">获取失败</h3>
             <p className="text-xs mt-1 text-muted-foreground">{currentCity}</p>
@@ -338,7 +361,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
           </div>
         </div>
         
-        <div className="mt-2">
+        <div className="mt-2 relative z-10">
           <p className="text-sm text-muted-foreground break-words overflow-hidden line-clamp-3">{error}</p>
           <button 
             onClick={() => fetchWeatherData('auto')} 
@@ -392,6 +415,25 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
             )}
           </button>
           
+          {savedCity && (
+            <button 
+              onClick={() => {
+                localStorage.removeItem('weatherCity');
+                setSavedCity(null);
+                fetchWeatherData('auto');
+                setShowCitySelector(false);
+              }}
+              className="text-xs text-left px-2 py-1.5 hover:bg-primary/10 rounded-sm flex items-center gap-2 transition-colors text-destructive"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+              </svg>
+              清除记忆城市
+            </button>
+          )}
+          
           <div className="border-t border-border/40 my-1"></div>
           
           <div className="flex flex-col space-y-1">
@@ -436,7 +478,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[200px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
+      className="weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
     >
       {/* 背景装饰 - 主题感知 */}
       <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
@@ -488,7 +530,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
                     '#090'
                 }}
               >
-                <span>空气{getAqiCategoryChineseName(weatherData.aqiCategory)}</span>
+                <span>{getAqiCategoryChineseName(weatherData.aqiCategory)}</span>
                 <span className="font-medium">{weatherData.aqi}</span>
               </div>
             </div>

@@ -4,7 +4,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const lat = searchParams.get('lat');
   const lon = searchParams.get('lon');
-  const city = searchParams.get('city'); // 新增：接收城市参数
+  const city = searchParams.get('city'); // 接收城市参数
   
   // 检查是否提供了必要的参数（经纬度或城市名）
   if ((!lat || !lon) && !city) {
@@ -28,15 +28,21 @@ export async function GET(request: Request) {
     let apiUrl;
     let locationType = '';
     
-    // 优先使用经纬度，如果没有则使用城市名
+    // 修改：优先使用经纬度，仅当经纬度不完整时才使用城市名
     if (lat && lon) {
+      // 使用正确的路径参数格式
       apiUrl = `https://devapi.qweather.com/airquality/v1/current/${lat}/${lon}?key=${apiKey}`;
       locationType = '经纬度';
-    } else {
-      // 如果没有经纬度，则使用城市名查询
-      // 注意：和风天气API使用location参数接收城市名
-      apiUrl = `https://devapi.qweather.com/v7/air/now?location=${encodeURIComponent(city!)}&key=${apiKey}`;
+    } else if (city) {
+      // 对于城市名，我们仍然使用查询参数格式
+      apiUrl = `https://devapi.qweather.com/v7/air/now?location=${encodeURIComponent(city)}&key=${apiKey}`;
       locationType = '城市名';
+    } else {
+      // 这种情况应该不会发生，因为前面已经检查过参数
+      return NextResponse.json(
+        { error: '缺少位置参数' },
+        { status: 400 }
+      );
     }
     
     console.log(`使用${locationType}请求空气质量数据: ${apiUrl.replace(apiKey, 'API_KEY')}`);

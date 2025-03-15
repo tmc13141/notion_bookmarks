@@ -21,8 +21,8 @@ export default function AnalogClock() {
   // Don't render clock hands until client-side time is available
   if (!time) {
     return (
-      <div className="analog-clock-widget p-3 rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm shadow-sm mx-auto">
-        <div className="clock-face relative w-[150px] h-[150px] rounded-full border border-border/50 bg-background/80 mx-auto">
+      <div className="analog-clock-widget p-3 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm mx-auto w-[150px] h-[150px] flex items-center justify-center">
+        <div className="clock-face relative w-[120px] h-[120px] rounded-full border border-border/40 bg-background/80 mx-auto">
           {/* Static clock face without hands */}
         </div>
       </div>
@@ -39,31 +39,34 @@ export default function AnalogClock() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="analog-clock-widget p-3 rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm shadow-sm mx-auto"
+      className="analog-clock-widget p-3 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm mx-auto w-[150px] h-[150px] flex items-center justify-center group relative overflow-hidden"
     >
-      <div className="clock-face relative w-[150px] h-[150px] rounded-full border border-border/50 bg-background/80 mx-auto">
-        {/* 时钟刻度 - 调整为外侧刻度 */}
+      {/* 背景装饰 - 主题感知 */}
+      <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
+      
+      <div className="clock-face relative w-[120px] h-[120px] rounded-full border border-border/40 bg-background/80 mx-auto z-10">
+        {/* 时钟刻度 - 调整为靠近边缘但不与数字重叠 */}
         {[...Array(12)].map((_, i) => (
           <div
             key={i}
             className="clock-marker absolute bg-foreground/80"
             style={{
-              height: i % 3 === 0 ? '10px' : '5px', // 主要刻度更长
+              height: i % 3 === 0 ? '8px' : '4px', // 缩短刻度长度
               width: i % 3 === 0 ? '2px' : '1px', // 主要刻度更粗
               left: '50%',
-              top: '2px', // 移到更靠近边缘
-              transformOrigin: '50% 73px', // 调整旋转中心点
+              top: '5px', // 移到靠近边缘但留出更多空间
+              transformOrigin: '50% 55px', // 调整旋转中心点
               transform: `translateX(-50%) rotate(${i * 30}deg)`,
             }}
           />
         ))}
         
-        {/* 时钟数字 - 放置在刻度内侧更远的位置 */}
+        {/* 时钟数字 - 放置在距离刻度更远的位置 */}
         {[...Array(12)].map((_, i) => {
           const number = i === 0 ? 12 : i;
           const angle = i * 30;
           const radian = (angle - 90) * (Math.PI / 180);
-          const radius = 48; // 更靠近中心
+          const radius = 40; // 更靠近中心，避免与刻度重叠
           
           // 计算数字的位置
           const x = radius * Math.cos(radian);
@@ -87,7 +90,7 @@ export default function AnalogClock() {
         
         {/* 时针 */}
         <div
-          className="clock-hour-hand absolute w-1.5 h-[40px] bg-foreground rounded-full"
+          className="clock-hour-hand absolute w-1.5 h-[35px] bg-foreground rounded-full"
           style={{
             left: '50%',
             bottom: '50%',
@@ -98,7 +101,7 @@ export default function AnalogClock() {
 
         {/* 分针 */}
         <div
-          className="clock-minute-hand absolute w-1 h-[55px] bg-foreground rounded-full"
+          className="clock-minute-hand absolute w-1 h-[45px] bg-foreground rounded-full"
           style={{
             left: '50%',
             bottom: '50%',
@@ -107,9 +110,9 @@ export default function AnalogClock() {
           }}
         />
 
-        {/* 秒针 */}
+        {/* 秒针 - 缩短长度确保不超出表盘 */}
         <div
-          className="clock-second-hand absolute w-0.5 h-[65px] bg-primary rounded-full"
+          className="clock-second-hand absolute w-0.5 h-[52px] bg-primary rounded-full"
           style={{
             left: '50%',
             bottom: '50%',
