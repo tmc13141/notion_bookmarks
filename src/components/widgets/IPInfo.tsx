@@ -38,58 +38,47 @@ export default function IPInfo() {
         }
       };
       
-      // 并行获取国内和海外IP信息
-      const [domesticResponse, overseasResponse] = await Promise.allSettled([
-        fetch('/api/ip/domestic', { cache: 'no-store' }),
-        fetch('/api/ip/overseas', { cache: 'no-store' })
-      ]);
-      
-      // 处理国内IP响应
-      if (domesticResponse.status === 'fulfilled' && domesticResponse.value.ok) {
-        const domesticData = await domesticResponse.value.json();
-        newIPData.domestic = {
-          ip: domesticData.ip || '未知IP',
-          location: domesticData.location || '未知位置'
-        };
-      } else {
-        let errorMessage = '请求失败';
-        if (domesticResponse.status === 'rejected') {
-          errorMessage = domesticResponse.reason?.message || '网络请求失败';
-        } else if (domesticResponse.status === 'fulfilled') {
-          try {
-            // 尝试从响应中获取错误信息
-            const errorData = await domesticResponse.value.json();
-            errorMessage = errorData.error || '服务响应错误';
-          } catch (e) {
-            errorMessage = `服务响应错误: ${domesticResponse.value.status}`;
+      // 获取国内IP信息
+      try {
+        const response = await fetch('https://whois.pconline.com.cn/ipJson.jsp?json=true', {
+          cache: 'no-store',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
           }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`服务响应错误: ${response.status}`);
         }
-        newIPData.domestic.error = errorMessage;
-        console.error('获取国内IP失败:', errorMessage);
+        
+        const data = await response.json();
+        newIPData.domestic = {
+          ip: data.ip || '未知IP',
+          location: data.city ? `${data.city}${data.pro ? ', ' + data.pro : ''}` : '未知位置'
+        };
+      } catch (error) {
+        console.error('获取国内IP失败:', error);
+        newIPData.domestic.error = '获取失败';
       }
       
-      // 处理海外IP响应
-      if (overseasResponse.status === 'fulfilled' && overseasResponse.value.ok) {
-        const overseasData = await overseasResponse.value.json();
-        newIPData.overseas = {
-          ip: overseasData.ip || '未知IP',
-          location: overseasData.location || '未知位置'
-        };
-      } else {
-        let errorMessage = '请求失败';
-        if (overseasResponse.status === 'rejected') {
-          errorMessage = overseasResponse.reason?.message || '网络请求失败';
-        } else if (overseasResponse.status === 'fulfilled') {
-          try {
-            // 尝试从响应中获取错误信息
-            const errorData = await overseasResponse.value.json();
-            errorMessage = errorData.error || '服务响应错误';
-          } catch (e) {
-            errorMessage = `服务响应错误: ${overseasResponse.value.status}`;
-          }
+      // 获取海外IP信息
+      try {
+        const response = await fetch('https://ipapi.co/json/', {
+          cache: 'no-store'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`服务响应错误: ${response.status}`);
         }
-        newIPData.overseas.error = errorMessage;
-        console.error('获取海外IP失败:', errorMessage);
+        
+        const data = await response.json();
+        newIPData.overseas = {
+          ip: data.ip || '未知IP',
+          location: data.city ? `${data.city}${data.region ? ', ' + data.region : ''}` : '未知位置'
+        };
+      } catch (error) {
+        console.error('获取海外IP失败:', error);
+        newIPData.overseas.error = '获取失败';
       }
       
       setIpData(newIPData);
@@ -199,13 +188,9 @@ export default function IPInfo() {
                 <span className="font-medium text-foreground truncate max-w-[120px]">{ipData?.domestic.ip}</span>
               )}
             </div>
-            <div className="flex items-start gap-1 text-muted-foreground mt-0.5">
-              <span className="inline-block w-10 shrink-0">位置:</span>
-              {ipData?.domestic.error ? (
-                <span className="text-xs text-destructive/80" title={ipData?.domestic.error}>服务不可用</span>
-              ) : (
-                <span className="truncate max-w-[120px]" title={ipData?.domestic.location || '未知'}>{ipData?.domestic.location || '未知'}</span>
-              )}
+            <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
+              <span className="inline-block w-10">位置:</span>
+              <span className="truncate max-w-[120px]">{ipData?.domestic.location}</span>
             </div>
           </div>
           
@@ -219,13 +204,9 @@ export default function IPInfo() {
                 <span className="font-medium text-foreground truncate max-w-[120px]">{ipData?.overseas.ip}</span>
               )}
             </div>
-            <div className="flex items-start gap-1 text-muted-foreground mt-0.5">
-              <span className="inline-block w-10 shrink-0">位置:</span>
-              {ipData?.overseas.error ? (
-                <span className="text-xs text-destructive/80" title={ipData?.overseas.error}>服务不可用</span>
-              ) : (
-                <span className="truncate max-w-[120px]" title={ipData?.overseas.location || '未知'}>{ipData?.overseas.location || '未知'}</span>
-              )}
+            <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
+              <span className="inline-block w-10">位置:</span>
+              <span className="truncate max-w-[120px]">{ipData?.overseas.location}</span>
             </div>
           </div>
         </div>
