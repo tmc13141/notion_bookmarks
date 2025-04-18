@@ -4,7 +4,7 @@ import Navigation from '@/components/layout/Navigation';
 import { getLinks, getCategories, getWebsiteConfig } from '@/lib/notion';
 import AnimatedMain from '@/components/layout/AnimatedMain';
 import Footer from '@/components/layout/Footer';
-import {SimpleTime,AnalogClock,Weather,IPInfo} from '@/components/widgets';
+import {SimpleTime,AnalogClock,Weather,IPInfo,HotNews} from '@/components/widgets';
 import WidgetsContainer from '@/components/layout/WidgetsContainer';
 
 export const revalidate = 43200; // 12小时重新验证一次
@@ -71,6 +71,7 @@ export default async function HomePage() {
                 <AnalogClock />
                 <Weather />
                 <IPInfo />
+                <HotNews />
               </WidgetsContainer>
               
               <LinkContainer 

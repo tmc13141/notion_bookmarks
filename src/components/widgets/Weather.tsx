@@ -44,6 +44,16 @@ const aqiCategoryMap: Record<string, string> = {
   'Excellent': '优'
 };
 
+// 空气质量样式映射
+const airQualityStyles = {
+  优: 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300',
+  良: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300',
+  轻度污染: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300',
+  中度污染: 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300',
+  重度污染: 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300',
+  严重污染: 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300',
+};
+
 export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -520,19 +530,11 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
           {weatherData?.aqi && (
             <div className="flex items-center gap-1">
               <div 
-                className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
-                style={{
-                  backgroundColor: weatherData.aqiColor ? 
-                    `rgba(${weatherData.aqiColor.red}, ${weatherData.aqiColor.green}, ${weatherData.aqiColor.blue}, 0.15)` : 
-                    'rgba(144, 238, 144, 0.15)',
-                  color: weatherData.aqiColor ? 
-                    `rgba(${weatherData.aqiColor.red}, ${weatherData.aqiColor.green}, ${weatherData.aqiColor.blue}, 1)` : 
-                    '#090'
-                }}
+                className={`px-1.5 py-0.5 rounded text-xs font-medium ${airQualityStyles[weatherData.aqiCategory || ''] || ''}`}
               >
-                <span>{getAqiCategoryChineseName(weatherData.aqiCategory)}</span>
-                <span className="font-medium">{weatherData.aqi}</span>
+                {weatherData.aqiCategory}
               </div>
+              <span className="font-medium">{weatherData.aqi}</span>
             </div>
           )}
         </div>

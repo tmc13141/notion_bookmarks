@@ -448,3 +448,66 @@
   mask-composite: exclude;
   pointer-events: none;
 }
+
+/* HotNews 组件样式 */
+[data-theme="cyberpunk-dark"] .bg-card {
+  background: linear-gradient(135deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
+  box-shadow: var(--card-glow);
+  border-radius: 0;
+  border: none;
+  position: relative;
+}
+
+[data-theme="cyberpunk-dark"] .bg-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: linear-gradient(135deg, hsl(320, 100%, 65%), hsl(190, 100%, 60%));
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+[data-theme="cyberpunk-dark"] .bg-primary {
+  background: hsl(320, 100%, 65%);
+  box-shadow: 0 0 10px hsl(320, 100%, 65%);
+}
+
+[data-theme="cyberpunk-dark"] .text-primary {
+  color: hsl(320, 100%, 65%);
+  text-shadow: var(--text-glow);
+}
+
+[data-theme="cyberpunk-dark"] .text-muted-foreground {
+  color: var(--muted-foreground);
+  text-shadow: none;
+}
+
+[data-theme="cyberpunk-dark"] .border-b {
+  border-color: hsla(320, 100%, 65%, 0.3);
+}
+
+[data-theme="cyberpunk-dark"] .hover\:bg-accent\/30:hover {
+  background: hsla(320, 100%, 65%, 0.1);
+}
+
+[data-theme="cyberpunk-dark"] .text-red-500 {
+  color: hsl(0, 100%, 65%);
+  text-shadow: 0 0 10px currentColor;
+}
+
+[data-theme="cyberpunk-dark"] .text-orange-500 {
+  color: hsl(30, 100%, 65%);
+  text-shadow: 0 0 10px currentColor;
+}
+
+[data-theme="cyberpunk-dark"] .text-yellow-500 {
+  color: hsl(60, 100%, 65%);
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* 如果需要覆盖某些默认样式，可以在这里添加 */
