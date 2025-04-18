@@ -15,86 +15,48 @@ export async function GET(req: NextRequest) {
   
   // 如果是本地开发环境，使用备用公共IP进行测试
   if (isReservedIP && process.env.NODE_ENV === 'development') {
-    // 使用一个公共IP作为开发环境中的备用方案（这里使用了谷歌的IP作为示例）
     ip = '8.8.8.8';
     console.log('本地开发环境检测到保留IP地址，使用备用IP:', ip);
   } else {
     console.log('用户IP地址:', ip);
   }
 
-  // 尝试多个IP定位服务，提高可靠性
-  const services = [
-    {
-      name: 'ipapi.co',
-      url: `https://ipapi.co/${encodeURIComponent(ip)}/json/`,
-      transform: (data: any) => ({
-        ip: data.ip || ip,
-        location: data.city ? `${data.city}${data.region ? ', ' + data.region : ''}` : '未知位置',
-        country: data.country_name || '未知国家',
-        region: data.region || '未知地区',
-        latitude: data.latitude,
-        longitude: data.longitude
-      })
-    },
-    {
-      name: 'ip-api.com',
-      url: `http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,message,country,regionName,city,query,lat,lon&lang=zh-CN`,
-      transform: (data: any) => ({
-        ip: data.query || ip,
-        location: data.city ? `${data.city}${data.regionName ? ', ' + data.regionName : ''}` : '未知位置',
-        country: data.country || '未知国家',
-        region: data.regionName || '未知地区',
-        latitude: data.lat,
-        longitude: data.lon
-      })
-    }
-  ];
-
-  let lastError: ServiceError | null = null;
-
-  // 依次尝试每个服务
-  for (const service of services) {
-    try {
-      console.log(`尝试使用 ${service.name} 获取IP信息...`);
-      const response = await fetch(service.url, { 
-        cache: 'no-store',
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-      });
-      
-      if (!response.ok) {
-        const statusText = response.statusText || '未知错误';
-        throw new Error(`${service.name} 服务响应错误: ${response.status} ${statusText}`);
+  // 使用 PC Online 的免费 IP 查询服务
+  try {
+    console.log('尝试获取IP信息...');
+    const response = await fetch(`https://whois.pconline.com.cn/ipJson.jsp?ip=${encodeURIComponent(ip)}&json=true`, { 
+      cache: 'no-store',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       }
-      
-      const data = await response.json();
-      
-      // 检查API特定的错误
-      if (service.name === 'ip-api.com' && data.status === 'fail') {
-        throw new Error(`${service.name} 返回错误: ${data.message}`);
-      }
-      
-      // 转换数据并返回
-      const result = service.transform(data);
-      console.log(`成功使用 ${service.name} 获取IP信息:`, result);
-      
-      return NextResponse.json(result, { status: 200 });
-    } catch (error) {
-      console.error(`使用 ${service.name} 获取IP信息失败:`, error);
-      lastError = error as ServiceError;
-      // 继续尝试下一个服务
+    });
+    
+    if (!response.ok) {
+      throw new Error(`服务响应错误: ${response.status}`);
     }
+    
+    const data = await response.json();
+    
+    // 转换数据并返回
+    const result = {
+      ip: data.ip || ip,
+      location: data.city ? `${data.city}${data.pro ? ', ' + data.pro : ''}` : '未知位置',
+      country: '中国',
+      region: data.pro || '未知地区'
+    };
+    
+    console.log('成功获取IP信息:', result);
+    return NextResponse.json(result, { status: 200 });
+    
+  } catch (error) {
+    console.error('获取IP信息失败:', error);
+    return NextResponse.json(
+      { 
+        error: `IP定位失败: ${(error as Error)?.message || '服务不可用'}`,
+        ip: ip, 
+        location: '未知位置' 
+      },
+      { status: 500 }
+    );
   }
-
-  // 所有服务都失败了
-  console.error('所有IP定位服务均失败');
-  return NextResponse.json(
-    { 
-      error: `国内IP定位失败: ${lastError?.message || '所有服务均不可用'}`, 
-      ip: ip, 
-      location: '未知位置' 
-    },
-    { status: 500 }
-  );
 }
