@@ -44,14 +44,16 @@ const aqiCategoryMap: Record<string, string> = {
   'Excellent': '优'
 };
 
-// 空气质量样式映射
-const airQualityStyles = {
-  优: 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300',
-  良: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300',
-  轻度污染: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300',
-  中度污染: 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300',
-  重度污染: 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300',
-  严重污染: 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300',
+// 添加空气质量类型定义
+type AqiCategory = '优' | '良' | '轻度污染' | '中度污染' | '重度污染' | '严重污染';
+
+const airQualityStyles: Record<AqiCategory, string> = {
+  '优': 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300',
+  '良': 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300',
+  '轻度污染': 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300',
+  '中度污染': 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300',
+  '重度污染': 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300',
+  '严重污染': 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'
 };
 
 export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
@@ -530,7 +532,11 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
           {weatherData?.aqi && (
             <div className="flex items-center gap-1">
               <div 
-                className={`px-1.5 py-0.5 rounded text-xs font-medium ${airQualityStyles[weatherData.aqiCategory || ''] || ''}`}
+                className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                  (weatherData.aqiCategory as AqiCategory) ? 
+                  airQualityStyles[weatherData.aqiCategory as AqiCategory] : 
+                  ''
+                }`}
               >
                 {weatherData.aqiCategory}
               </div>
