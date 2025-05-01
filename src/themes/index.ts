@@ -1,69 +1,48 @@
-import { type ThemeConfig } from '@/types/theme';
+import './theme.css'
 
-// 导入所有主题配置
-import { simpleTheme } from './simple';
-import { cyberpunkTheme } from './cyberpunk';
-
-// 所有可用主题的映射
-export const themes: Record<string, ThemeConfig> = {
-  simple: simpleTheme,
-  cyberpunk: cyberpunkTheme,
-};
-
-// 默认主题配置
-export const defaultTheme = simpleTheme;
-
-/**
- * 获取主题配置
- * @param themeName 主题名称
- * @returns 主题配置
- */
-export function getTheme(themeName: string): ThemeConfig | undefined {
-  return themes[themeName];
+export interface Theme {
+  name: string
+  displayName: string
+  mode: 'light' | 'dark'
 }
 
-/**
- * 获取所有可用主题
- * @returns 所有主题的配置
- */
-export function getAllThemes(): ThemeConfig[] {
-  return Object.values(themes);
+export const themes: Theme[] = [
+  {
+    name: 'simple-light',
+    displayName: '简约浅色',
+    mode: 'light'
+  },
+  {
+    name: 'simple-dark',
+    displayName: '简约深色',
+    mode: 'dark'
+  },
+  {
+    name: 'cyberpunk-dark',
+    displayName: '赛博朋克',
+    mode: 'dark'
+  }
+]
+
+export function getAllThemes(): Theme[] {
+  return themes
 }
 
-/**
- * 注册新主题
- * @param theme 主题配置
- */
-export function registerTheme(theme: ThemeConfig): void {
-  if (!theme.name) {
-    console.error('主题必须有一个名称');
-    return;
+export function getThemeMode(themeName: string): 'light' | 'dark' {
+  const theme = themes.find(t => t.name === themeName)
+  return theme?.mode || 'light'
+}
+
+// 应用主题样式
+export function applyTheme(themeName: string) {
+  // 确保主题名称有效
+  if (!themes.find(t => t.name === themeName)) {
+    themeName = 'simple-light'
   }
   
-  themes[theme.name] = theme;
-  
-  // 如果在浏览器环境中，触发主题变化事件以更新样式
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new Event('themeChange'));
-  }
-}
-
-/**
- * 获取主题的模式列表
- * @param themeName 主题名称
- * @returns 主题支持的模式列表
- */
-export function getThemeModes(themeName: string): string[] {
-  const theme = getTheme(themeName);
-  return theme ? theme.modes : [];
-}
-
-/**
- * 获取主题的显示名称
- * @param themeName 主题名称
- * @returns 主题的显示名称
- */
-export function getThemeDisplayName(themeName: string): string {
-  const theme = getTheme(themeName);
-  return theme ? theme.displayName : themeName;
+  document.documentElement.setAttribute('data-theme', themeName)
+  // 保存到 localStorage
+  localStorage.setItem('theme', themeName)
+  // 触发主题变化事件
+  window.dispatchEvent(new Event('themeChange'))
 }

@@ -1,446 +1,134 @@
 /* 赛博朋克主题样式 */
 
-/* 优化字体加载 */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;500&display=swap&text=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap');
+/* 导入字体 */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
-/* 基础变量定义 */
+/* 全局变量 */
 [data-theme="cyberpunk-dark"] {
-  --card-glow: 0 0 20px hsla(320, 100%, 65%, 0.6), 0 0 10px hsla(190, 100%, 60%, 0.4);
-  --card-glow-hover: 0 0 40px hsla(320, 100%, 65%, 0.8), 0 0 20px hsla(190, 100%, 60%, 0.6), 0 0 60px hsla(320, 100%, 65%, 0.5);
-  --text-glow: 0 0 12px hsl(320, 100%, 65%);
-  --border-glow: 0 0 8px hsl(320, 100%, 65%);
-
-  --tag-glow: 0 0 15px hsl(190, 100%, 60%);
-  
-  /* 确保文字颜色在深色背景下可见 */
-  --foreground: hsl(0, 0%, 100%);
-  --card-foreground: hsl(0, 0%, 100%);
-  --background-foreground: hsl(0, 0%, 100%);
-  --muted-foreground: hsl(220, 25%, 75%);
+  --text-glow: 0 0 10px currentColor;
+  --card-glow: 0 0 20px hsla(286, 100%, 65%, 0.4), 0 0 10px hsla(180, 100%, 55%, 0.3);
+  --card-glow-hover: 0 0 40px hsla(286, 100%, 65%, 0.7), 0 0 20px hsla(180, 100%, 55%, 0.5), 0 0 60px hsla(286, 100%, 65%, 0.3);
 }
 
-/* 卡片基础样式 */
-[data-theme="cyberpunk-dark"] .group {
-    position: relative;
-    box-shadow: var(--card-glow);
-    border: none;
-    background: linear-gradient(135deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    overflow: hidden;
-    border-radius: 0;
-
-  }
-  
-  [data-theme="cyberpunk-dark"] .group::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    padding: 2px;
-    background: linear-gradient(135deg, hsl(320, 100%, 65%), hsl(190, 100%, 60%));
-    -webkit-mask: 
-      linear-gradient(#fff 0 0) content-box, 
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-
-  }
-
-
-
-/* 优化字体渲染 */
-[data-theme="cyberpunk-dark"] * {
-  font-family: 'Orbitron', 'Noto Sans SC', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  letter-spacing: 0.05em;
-  font-weight: 700;
-}
-
-[data-theme="cyberpunk-dark"] p {
+/* 基础样式 */
+[data-theme="cyberpunk-dark"] {
+  background-color: hsl(232, 40%, 4%);
+  color: hsl(0, 0%, 100%);
   font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
-  text-shadow: var(--text-glow);
-  font-weight: 500;
 }
 
-/* 优化卡片性能 */
+/* 标题样式 */
+[data-theme="cyberpunk-dark"] h1,
+[data-theme="cyberpunk-dark"] h2,
+[data-theme="cyberpunk-dark"] h3,
+[data-theme="cyberpunk-dark"] h4,
+[data-theme="cyberpunk-dark"] h5,
+[data-theme="cyberpunk-dark"] h6 {
+  font-family: 'Orbitron', 'Noto Sans SC', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-shadow: var(--text-glow);
+}
+
+/* 卡片样式 */
 [data-theme="cyberpunk-dark"] .group {
   position: relative;
+  background: linear-gradient(135deg, hsla(232, 40%, 8%, 0.8) 0%, hsla(232, 40%, 4%, 0.9) 100%);
+  border: 2px solid transparent;
+  border-radius: 0;
   overflow: hidden;
-  will-change: transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-/* 卡片悬浮效果 */
+[data-theme="cyberpunk-dark"] .group::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: linear-gradient(135deg, hsl(286, 100%, 65%), hsl(180, 100%, 55%));
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
 [data-theme="cyberpunk-dark"] .group:hover {
+  transform: translateY(-2px);
   box-shadow: var(--card-glow-hover);
-  transform: translateY(-3px);
-  border-color: hsl(190, 100%, 60%);
-  border-width: 2px;
 }
 
-/* 标题文字效果 */
-[data-theme="cyberpunk-dark"] h3 {
-  color: var(--foreground);
-  font-family: 'Orbitron', 'Noto Sans SC', sans-serif;
-  text-shadow: var(--text-glow), 0 0 20px hsl(320, 100%, 65%);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-/* 描述文字效果 */
-[data-theme="cyberpunk-dark"] p {
-  color: var(--foreground);
-  font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
-}
-
-/* SimpleTime组件样式 */
-[data-theme="cyberpunk-dark"] .simple-time-widget {
-  position: relative;
-  box-shadow: var(--card-glow);
+/* 按钮样式 */
+[data-theme="cyberpunk-dark"] button {
+  background: linear-gradient(135deg, hsl(286, 100%, 65%), hsl(180, 100%, 55%));
   border: none;
-  background: linear-gradient(135deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-  border-radius: 0;
-  max-width: 280px;
-  margin: 0 auto;
-}
-
-[data-theme="cyberpunk-dark"] .simple-time-widget::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 2px;
-  background: linear-gradient(135deg, hsl(320, 100%, 65%), hsl(190, 100%, 60%));
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-[data-theme="cyberpunk-dark"] .simple-time-widget .text-primary {
-  color: hsl(190, 100%, 60%);
-  text-shadow: var(--text-glow), 0 0 20px hsl(190, 100%, 60%);
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: 0.1em;
-  font-size: 3.5rem;
-  line-height: 1;
-}
-
-[data-theme="cyberpunk-dark"] .simple-time-widget:hover {
-  box-shadow: var(--card-glow-hover);
-  transform: translateY(-3px);
-}
-
-[data-theme="cyberpunk-dark"] .simple-time-widget .text-lg {
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: 0.05em;
-}
-
-[data-theme="cyberpunk-dark"] .simple-time-widget .text-base,
-[data-theme="cyberpunk-dark"] .simple-time-widget .text-xs {
+  color: hsl(0, 0%, 100%);
+  text-shadow: var(--text-glow);
   font-family: 'Rajdhani', sans-serif;
-}
-
-[data-theme="cyberpunk-dark"] .simple-time-widget .mt-2 {
-  margin-top: 0.5rem;
-  border-top: 1px solid hsla(320, 100%, 65%, 0.3);
-  padding-top: 0.5rem;
-}
-
-/* 图标容器样式 - 移除边框 */
-[data-theme="cyberpunk-dark"] .icon-container,
-[data-theme="cyberpunk-dark"] .group .relative.w-10.h-10 {
-  border: none !important;
-  background: transparent !important;
-  box-shadow: var(--text-glow);
-}
-
-/* 导航组件样式 */
-[data-theme="cyberpunk-dark"] nav {
-  background: linear-gradient(180deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
-  border-color: hsl(320, 100%, 65%);
-  box-shadow: var(--border-glow);
-}
-
-[data-theme="cyberpunk-dark"] nav span,
-[data-theme="cyberpunk-dark"] nav button {
-  color: var(--foreground);
-  font-family: 'Orbitron', 'Noto Sans SC', sans-serif;
-  text-shadow: var(--text-glow);
-}
-
-/* 导航标题特殊样式 */
-[data-theme="cyberpunk-dark"] nav span.font-medium {
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-shadow: 0 0 10px hsl(320, 100%, 65%),
-               0 0 20px hsl(320, 100%, 65%),
-               0 0 30px hsl(320, 100%, 65%);
-  position: relative;
-  animation: textGlitch 3s infinite;
-}
-
-@keyframes textGlitch {
-  0% {
-    text-shadow: 0 0 10px hsl(320, 100%, 65%),
-                 0 0 20px hsl(320, 100%, 65%),
-                 0 0 30px hsl(320, 100%, 65%);
-  }
-  50% {
-    text-shadow: -1px -1px 0 hsl(320, 100%, 65%),
-                 1px 1px 0 hsl(190, 100%, 60%),
-                 0 0 20px hsl(320, 100%, 65%);
-  }
-  100% {
-    text-shadow: 0 0 10px hsl(320, 100%, 65%),
-                 0 0 20px hsl(320, 100%, 65%),
-                 0 0 30px hsl(320, 100%, 65%);
-  }
-}
-
-/* Weather组件样式 */
-[data-theme="cyberpunk-dark"] .weather-widget {
-  background: linear-gradient(135deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
-  box-shadow: var(--card-glow);
-  border-radius: 0;
-  border: none;
-  position: relative;
-}
-
-[data-theme="cyberpunk-dark"] .weather-widget::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 2px;
-  background: linear-gradient(135deg, hsl(320, 100%, 65%), hsl(190, 100%, 60%));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-[data-theme="cyberpunk-dark"] .weather-widget:hover {
-  box-shadow: var(--card-glow-hover);
-  transform: translateY(-3px);
-}
-
-[data-theme="cyberpunk-dark"] .weather-widget h3 {
-  text-shadow: var(--text-glow), 0 0 20px hsl(320, 100%, 65%);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-}
-
-[data-theme="cyberpunk-dark"] .weather-widget .weather-icon {
-  text-shadow: 0 0 15px currentColor;
-}
-
-[data-theme="cyberpunk-dark"] .simple-time-widget {
-  position: relative;
-  box-shadow: var(--card-glow);
-  border: none;
-  background: linear-gradient(135deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-  border-radius: 0;
-  max-width: 280px;
-  margin: 0 auto;
-}
-
-[data-theme="cyberpunk-dark"] .simple-time-widget::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 2px;
-  background: linear-gradient(135deg, hsl(320, 100%, 65%), hsl(190, 100%, 60%));
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-[data-theme="cyberpunk-dark"] .simple-time-widget .text-primary {
-  color: hsl(190, 100%, 60%);
-  text-shadow: var(--text-glow), 0 0 20px hsl(190, 100%, 60%);
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: 0.1em;
-  font-size: 3.5rem;
-  line-height: 1;
-}
-
-[data-theme="cyberpunk-dark"] .simple-time-widget:hover {
-  box-shadow: var(--card-glow-hover);
-  transform: translateY(-3px);
-}
-
-[data-theme="cyberpunk-dark"] .simple-time-widget .text-lg {
-  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
   letter-spacing: 0.05em;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-[data-theme="cyberpunk-dark"] .simple-time-widget .text-base,
-[data-theme="cyberpunk-dark"] .simple-time-widget .text-xs {
-  font-family: 'Rajdhani', sans-serif;
+[data-theme="cyberpunk-dark"] button:hover {
+  box-shadow: 0 0 20px currentColor;
+  transform: translateY(-1px);
 }
 
-[data-theme="cyberpunk-dark"] .simple-time-widget .mt-2 {
-  margin-top: 0.5rem;
-  border-top: 1px solid hsla(320, 100%, 65%, 0.3);
-  padding-top: 0.5rem;
+/* 链接样式 */
+[data-theme="cyberpunk-dark"] a {
+  color: hsl(180, 100%, 55%);
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
-/* 图标容器样式 - 移除边框 */
-[data-theme="cyberpunk-dark"] .icon-container,
-[data-theme="cyberpunk-dark"] .group .relative.w-10.h-10 {
-  border: none !important;
-  background: transparent !important;
-  box-shadow: var(--text-glow);
+[data-theme="cyberpunk-dark"] a:hover {
+  color: hsl(286, 100%, 65%);
+  text-shadow: var(--text-glow);
 }
 
-/* 导航组件样式 */
+/* 导航样式 */
 [data-theme="cyberpunk-dark"] nav {
-  background: linear-gradient(180deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
-  border-color: hsl(320, 100%, 65%);
-  box-shadow: var(--border-glow);
+  background: linear-gradient(to bottom, hsla(232, 40%, 8%, 0.8), hsla(232, 40%, 4%, 0.9));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-color: hsl(286, 100%, 65%);
 }
 
-[data-theme="cyberpunk-dark"] nav span,
-[data-theme="cyberpunk-dark"] nav button {
-  color: var(--foreground);
-  font-family: 'Orbitron', 'Noto Sans SC', sans-serif;
-  text-shadow: var(--text-glow);
+/* 滚动条样式 */
+[data-theme="cyberpunk-dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-/* 导航标题特殊样式 */
-[data-theme="cyberpunk-dark"] nav span.font-medium {
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-shadow: 0 0 10px hsl(320, 100%, 65%),
-               0 0 20px hsl(320, 100%, 65%),
-               0 0 30px hsl(320, 100%, 65%);
-  position: relative;
-  animation: textGlitch 3s infinite;
+[data-theme="cyberpunk-dark"] ::-webkit-scrollbar-track {
+  background: hsla(232, 40%, 4%, 0.5);
 }
 
-@keyframes textGlitch {
-  0% {
-    text-shadow: 0 0 10px hsl(320, 100%, 65%),
-                 0 0 20px hsl(320, 100%, 65%),
-                 0 0 30px hsl(320, 100%, 65%);
-  }
-  50% {
-    text-shadow: -1px -1px 0 hsl(320, 100%, 65%),
-                 1px 1px 0 hsl(190, 100%, 60%),
-                 0 0 20px hsl(320, 100%, 65%);
-  }
-  100% {
-    text-shadow: 0 0 10px hsl(320, 100%, 65%),
-                 0 0 20px hsl(320, 100%, 65%),
-                 0 0 30px hsl(320, 100%, 65%);
-  }
+[data-theme="cyberpunk-dark"] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, hsl(286, 100%, 65%), hsl(180, 100%, 55%));
+  border-radius: 4px;
 }
 
-/* 导航按钮悬浮效果 */
-[data-theme="cyberpunk-dark"] nav button:hover {
-  background-color: hsl(230, 30%, 15%);
-  box-shadow: 0 0 15px hsl(320, 100%, 65%);
+[data-theme="cyberpunk-dark"] ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, hsl(286, 100%, 75%), hsl(180, 100%, 65%));
 }
 
-/* 导航按钮激活状态 */
-[data-theme="cyberpunk-dark"] nav button.bg-primary {
-  background-color: hsl(286, 100%, 65%); /* 使用主题色 */
-  color: hsl(0, 0%, 100%) !important; /* 确保文字为白色且优先级高 */
-  text-shadow: 0 0 8px hsl(0, 0%, 100%), 0 0 15px hsl(286, 100%, 65%); /* 添加文字发光效果 */
-  box-shadow: 0 0 10px hsla(286, 100%, 65%, 0.7); /* 添加按钮发光效果 */
-}
-
-/* 导航图标样式 */
-[data-theme="cyberpunk-dark"] nav svg {
-  filter: drop-shadow(0 0 2px hsl(320, 100%, 65%));
-}
-
-/* 动画效果 */
-
-
-/* 标签样式 */
-[data-theme="cyberpunk-dark"] .tag {
-  background: hsl(230, 30%, 15%);
-  border: 1px solid hsl(190, 100%, 60%);
-  color: hsl(190, 100%, 80%);
-  box-shadow: var(--tag-glow);
-}
-
-/* 确保导航中的文字颜色正确 */
-[data-theme="cyberpunk-dark"] .text-muted-foreground {
-  color: var(--muted-foreground);
-}
-
-[data-theme="cyberpunk-dark"] .text-foreground {
-  color: var(--foreground);
-}
-
-[data-theme="cyberpunk-dark"] .text-primary {
-  color: hsl(320, 100%, 65%);
-}
-
-/* 确保卡片中的文字颜色正确 */
-[data-theme="cyberpunk-dark"] .group h3,
-[data-theme="cyberpunk-dark"] .group p,
-[data-theme="cyberpunk-dark"] .group span {
-  color: var(--foreground);
-}
-
-/* 背景图片样式 */
-[data-theme="cyberpunk-dark"] {
-  position: relative;
-}
-
-@media (min-width: 1024px) {
-  [data-theme="cyberpunk-dark"]::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('/images/cyberpunk-bg.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.25;
-    will-change: transform;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    z-index: -1;
-    pointer-events: none;
-  }
-}
-
-/* 天气组件样式 */
-[data-theme="cyberpunk-dark"] .weather-widget {
-  background: linear-gradient(135deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
-  box-shadow: var(--card-glow);
-  border-radius: 0;
+/* 组件特定样式 */
+[data-theme="cyberpunk-dark"] .widget-card {
+  background: linear-gradient(135deg, hsla(232, 40%, 8%, 0.8) 0%, hsla(232, 40%, 4%, 0.9) 100%);
   border: none;
   position: relative;
 }
 
-[data-theme="cyberpunk-dark"] .weather-widget::before {
+[data-theme="cyberpunk-dark"] .widget-card::before {
   content: '';
   position: absolute;
   inset: 0;
   padding: 2px;
-  background: linear-gradient(135deg, hsl(320, 100%, 65%), hsl(190, 100%, 60%));
+  background: linear-gradient(135deg, hsl(286, 100%, 65%), hsl(180, 100%, 55%));
   -webkit-mask: 
     linear-gradient(#fff 0 0) content-box, 
     linear-gradient(#fff 0 0);
@@ -449,65 +137,54 @@
   pointer-events: none;
 }
 
-/* HotNews 组件样式 */
-[data-theme="cyberpunk-dark"] .bg-card {
-  background: linear-gradient(135deg, hsl(230, 35%, 7%) 0%, rgba(0,0,0,0.95) 100%);
-  box-shadow: var(--card-glow);
-  border-radius: 0;
+[data-theme="cyberpunk-dark"] .platform-tab {
+  background: transparent;
+  border: 1px solid hsl(286, 100%, 65%);
+  color: hsl(0, 0%, 100%);
+}
+
+[data-theme="cyberpunk-dark"] .platform-tab:hover {
+  background: hsla(286, 100%, 65%, 0.2);
+  border-color: hsl(180, 100%, 55%);
+}
+
+[data-theme="cyberpunk-dark"] .platform-tab-active {
+  background: linear-gradient(135deg, hsl(286, 100%, 65%), hsl(180, 100%, 55%));
   border: none;
-  position: relative;
-}
-
-[data-theme="cyberpunk-dark"] .bg-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 2px;
-  background: linear-gradient(135deg, hsl(320, 100%, 65%), hsl(190, 100%, 60%));
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-[data-theme="cyberpunk-dark"] .bg-primary {
-  background: hsl(320, 100%, 65%);
-  box-shadow: 0 0 10px hsl(320, 100%, 65%);
-}
-
-[data-theme="cyberpunk-dark"] .text-primary {
-  color: hsl(320, 100%, 65%);
+  color: hsl(0, 0%, 100%);
   text-shadow: var(--text-glow);
 }
 
-[data-theme="cyberpunk-dark"] .text-muted-foreground {
-  color: var(--muted-foreground);
-  text-shadow: none;
+[data-theme="cyberpunk-dark"] .hot-news-item {
+  border-left: 2px solid transparent;
+  transition: all 0.3s ease;
 }
 
-[data-theme="cyberpunk-dark"] .border-b {
-  border-color: hsla(320, 100%, 65%, 0.3);
+[data-theme="cyberpunk-dark"] .hot-news-item:hover {
+  border-left-color: hsl(286, 100%, 65%);
+  background: linear-gradient(90deg, hsla(286, 100%, 65%, 0.2), transparent);
 }
 
-[data-theme="cyberpunk-dark"] .hover\:bg-accent\/30:hover {
-  background: hsla(320, 100%, 65%, 0.1);
+[data-theme="cyberpunk-dark"] .hot-news-index {
+  font-family: 'Orbitron', monospace;
+  color: hsl(286, 100%, 65%);
+  text-shadow: var(--text-glow);
 }
 
-[data-theme="cyberpunk-dark"] .text-red-500 {
-  color: hsl(0, 100%, 65%);
-  text-shadow: 0 0 10px currentColor;
+[data-theme="cyberpunk-dark"] .hot-news-title {
+  color: hsl(0, 0%, 100%);
+  transition: all 0.3s ease;
 }
 
-[data-theme="cyberpunk-dark"] .text-orange-500 {
-  color: hsl(30, 100%, 65%);
-  text-shadow: 0 0 10px currentColor;
+[data-theme="cyberpunk-dark"] .hot-news-item:hover .hot-news-title {
+  color: hsl(180, 100%, 55%);
+  text-shadow: var(--text-glow);
 }
 
-[data-theme="cyberpunk-dark"] .text-yellow-500 {
-  color: hsl(60, 100%, 65%);
-  text-shadow: 0 0 10px currentColor;
+[data-theme="cyberpunk-dark"] .hot-news-views {
+  color: hsl(232, 20%, 70%);
 }
 
-/* 如果需要覆盖某些默认样式，可以在这里添加 */
+[data-theme="cyberpunk-dark"] .hot-news-icon {
+  color: hsl(180, 100%, 55%);
+}

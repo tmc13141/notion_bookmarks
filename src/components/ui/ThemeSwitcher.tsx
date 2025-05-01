@@ -1,61 +1,51 @@
-'use client';
+"use client"
 
-import { useTheme } from 'next-themes';
-import { useEffect, useState, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { IconPalette } from '@tabler/icons-react';
-import { getAllThemes, getThemeDisplayName } from '@/themes';
-import { ThemeConfig } from '@/types/theme';
+import * as React from "react"
+import { motion } from "framer-motion"
+import { IconPalette } from "@tabler/icons-react"
+import { useTheme } from "next-themes"
 
 interface ThemeSwitcherProps {
-  className?: string;
+  className?: string
 }
 
-// 获取所有可用主题
-const allThemes = getAllThemes();
+const themeNames = {
+  'simple-light': '简约浅色',
+  'simple-dark': '简约深色',
+  'cyberpunk-dark': '赛博朋克'
+}
 
-// 构建主题选项列表
-const themeOptions = allThemes.flatMap((theme: ThemeConfig) => 
-  theme.modes.map(mode => ({
-    id: `${theme.name}-${mode}`,
-    name: `${theme.name}-${mode}`,
-    displayName: `${getThemeDisplayName(theme.name)}${theme.modes.length > 1 ? (mode === 'light' ? '浅色' : '深色') : ''}`
-  }))
-);
+export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
+  const [mounted, setMounted] = React.useState(false)
+  const [isOpen, setIsOpen] = React.useState(false)
+  const { theme, setTheme } = useTheme()
+  const dropdownRef = React.useRef<HTMLDivElement>(null)
+  const buttonRef = React.useRef<HTMLButtonElement>(null)
 
-export default function ThemeSwitcher({ className }: ThemeSwitcherProps) {
-  const [mounted, setMounted] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // 避免水合不匹配
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // 点击外部关闭下拉菜单
-  useEffect(() => {
-    if (!isOpen) return;
-
-    function handleClickOutside(event: MouseEvent) {
+  // 处理点击外部关闭下拉菜单
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current && 
         buttonRef.current && 
         !dropdownRef.current.contains(event.target as Node) && 
         !buttonRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
     }
 
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [isOpen]);
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [isOpen])
+
+  // 确保在客户端渲染
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   if (!mounted) {
-    return null;
+    return null
   }
 
   return (
@@ -65,11 +55,10 @@ export default function ThemeSwitcher({ className }: ThemeSwitcherProps) {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
+          e.stopPropagation()
+          setIsOpen(!isOpen)
         }}
-        className="p-2 rounded-lg text-muted-foreground hover:text-foreground
-                  transition-colors"
+        className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
         aria-label="切换主题"
       >
         <IconPalette className="w-5 h-5" />
@@ -81,23 +70,23 @@ export default function ThemeSwitcher({ className }: ThemeSwitcherProps) {
           className="absolute right-0 mt-2 w-48 py-2 bg-popover border rounded-lg shadow-lg z-[200]"
           onClick={(e) => e.stopPropagation()}
         >
-          {themeOptions.map((themeOption) => (
+          {Object.entries(themeNames).map(([name, displayName]) => (
             <button
-              key={themeOption.id}
+              key={name}
               className={`w-full text-left px-4 py-2 text-sm rounded-md transition-colors
-                        ${theme === themeOption.name
+                        ${theme === name
                           ? 'bg-primary/10 text-primary' 
-                          : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
               onClick={() => {
-                setTheme(themeOption.name);
-                setIsOpen(false);
+                setTheme(name)
+                setIsOpen(false)
               }}
             >
-              {themeOption.displayName}
+              {displayName}
             </button>
           ))}
         </div>
       )}
     </div>
-  );
+  )
 }

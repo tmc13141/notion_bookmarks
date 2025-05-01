@@ -22,70 +22,24 @@ export default function IPInfo() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchIPData = async () => {
-    setLoading(true);
-    setError(null);
-    
     try {
-      // 创建一个新的IPData对象
-      const newIPData: IPData = {
-        domestic: {
-          ip: '获取中...',
-          location: '获取中...'
-        },
-        overseas: {
-          ip: '获取中...',
-          location: '获取中...'
-        }
-      };
+      setLoading(true);
+      setError(null);
       
-      // 获取国内IP信息
-      try {
-        const response = await fetch('https://whois.pconline.com.cn/ipJson.jsp?json=true', {
-          cache: 'no-store',
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error(`服务响应错误: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        newIPData.domestic = {
-          ip: data.ip || '未知IP',
-          location: data.city ? `${data.city}${data.pro ? ', ' + data.pro : ''}` : '未知位置'
-        };
-      } catch (error) {
-        console.error('获取国内IP失败:', error);
-        newIPData.domestic.error = '获取失败';
+      const response = await fetch('/api/ip', { 
+        cache: 'no-store'
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        setError(data.error || '服务暂时不可用');
+        return;
       }
       
-      // 获取海外IP信息
-      try {
-        const response = await fetch('https://ipapi.co/json/', {
-          cache: 'no-store'
-        });
-        
-        if (!response.ok) {
-          throw new Error(`服务响应错误: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        newIPData.overseas = {
-          ip: data.ip || '未知IP',
-          location: data.city ? `${data.city}${data.region ? ', ' + data.region : ''}` : '未知位置'
-        };
-      } catch (error) {
-        console.error('获取海外IP失败:', error);
-        newIPData.overseas.error = '获取失败';
-      }
-      
-      setIpData(newIPData);
-    } catch (err) {
-      console.error('获取IP数据失败:', err);
-      const errorMessage = err instanceof Error ? err.message : '未知错误';
-      setError(errorMessage);
+      setIpData(data);
+    } catch {
+      setError('网络连接失败');
     } finally {
       setLoading(false);
     }
@@ -93,14 +47,10 @@ export default function IPInfo() {
 
   useEffect(() => {
     fetchIPData();
-    
-    // 每10分钟更新一次IP数据
     const intervalId = setInterval(fetchIPData, 10 * 60 * 1000);
-    
     return () => clearInterval(intervalId);
   }, []);
 
-  // 加载状态
   if (loading && !ipData) {
     return (
       <motion.div
@@ -117,7 +67,6 @@ export default function IPInfo() {
     );
   }
   
-  // 错误状态
   if (error) {
     return (
       <motion.div
@@ -126,7 +75,6 @@ export default function IPInfo() {
         transition={{ duration: 0.5 }}
         className="ip-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[200px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
       >
-        {/* 背景装饰 - 主题感知 */}
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
         
         <div className="relative z-10">
@@ -146,7 +94,6 @@ export default function IPInfo() {
     );
   }
   
-  // 正常显示IP信息
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -154,7 +101,6 @@ export default function IPInfo() {
       transition={{ duration: 0.5 }}
       className="ip-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[200px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
     >
-      {/* 背景装饰 - 主题感知 */}
       <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
       
       <div className="relative z-10">
@@ -178,15 +124,10 @@ export default function IPInfo() {
         </h3>
         
         <div className="space-y-3">
-          {/* 国内IP信息 */}
           <div className="text-xs">
             <div className="flex items-center gap-1 text-muted-foreground">
               <span className="inline-block w-10">国内:</span>
-              {ipData?.domestic.error ? (
-                <span className="text-destructive">获取失败</span>
-              ) : (
-                <span className="font-medium text-foreground truncate max-w-[120px]">{ipData?.domestic.ip}</span>
-              )}
+              <span className="font-medium text-foreground truncate max-w-[120px]">{ipData?.domestic.ip}</span>
             </div>
             <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
               <span className="inline-block w-10">位置:</span>
@@ -194,15 +135,10 @@ export default function IPInfo() {
             </div>
           </div>
           
-          {/* 海外IP信息 */}
           <div className="text-xs">
             <div className="flex items-center gap-1 text-muted-foreground">
               <span className="inline-block w-10">海外:</span>
-              {ipData?.overseas.error ? (
-                <span className="text-destructive">获取失败</span>
-              ) : (
-                <span className="font-medium text-foreground truncate max-w-[120px]">{ipData?.overseas.ip}</span>
-              )}
+              <span className="font-medium text-foreground truncate max-w-[120px]">{ipData?.overseas.ip}</span>
             </div>
             <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
               <span className="inline-block w-10">位置:</span>
