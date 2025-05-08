@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { IconExternalLink } from '@tabler/icons-react';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { cn } from '@/lib/utils';
 
 interface LinkCardProps {
   link: Link;
@@ -51,6 +52,7 @@ function getIconUrl(link: Link): string {
 export default function LinkCard({ link, className }: LinkCardProps) {
   const [titleTooltip, setTitleTooltip] = useState({ show: false, x: 0, y: 0 });
   const [descTooltip, setDescTooltip] = useState({ show: false, x: 0, y: 0 });
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleMouseEnter = (
     event: React.MouseEvent<HTMLElement>,
@@ -76,16 +78,12 @@ export default function LinkCard({ link, className }: LinkCardProps) {
         rel="noopener noreferrer"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className={`
-          block group relative
-          p-4 rounded-xl border border-border/50
-          transition-all duration-300 ease-out
-          hover:shadow-lg hover:shadow-primary/5
-          bg-card/50 backdrop-blur-sm
-          h-[160px] min-w-[280px]
-          overflow-hidden
-          ${className || ''}
-        `}
+        className={cn(
+          "group block p-4 rounded-xl border border-border/50 bg-card hover:border-primary/50 transition-all",
+          "hover:shadow-lg hover:shadow-primary/5",
+          "w-full max-w-full",
+          className
+        )}
       >
         {/* 内容容器 */}
         <div className="flex flex-col h-full gap-2">
@@ -103,8 +101,14 @@ export default function LinkCard({ link, className }: LinkCardProps) {
                 src={getIconUrl(link)}
                 alt="Site Icon"
                 fill
-                className="object-contain"
+                className={cn(
+                  "object-contain transition-opacity duration-300",
+                  imageLoaded ? "opacity-100" : "opacity-0"
+                )}
                 sizes="40px"
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageLoaded(true)}
+                loading="lazy"
               />
             </motion.div>
             

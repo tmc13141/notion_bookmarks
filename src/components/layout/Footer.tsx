@@ -7,11 +7,12 @@ import Image from 'next/image'
 
 interface FooterProps {
   config: WebsiteConfig
+  className?: string
 }
 
-export default function Footer({ config }: FooterProps) {
+export default function Footer({ config, className = "" }: FooterProps) {
   return (
-    <footer className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t py-4 z-10">
+    <footer className={`fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t py-4 z-10 ${className}`}>
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
           <div className="flex items-center space-x-4">

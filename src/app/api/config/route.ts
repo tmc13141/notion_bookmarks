@@ -4,9 +4,9 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    console.log('API: 开始获取网站配置...');
+    console.error('API: 开始获取网站配置...');
     const config = await getWebsiteConfig();
-    console.log('API: 成功获取配置:', config);
+    console.error('API: 成功获取配置:', config);
     return NextResponse.json(config);
   } catch (error) {
     console.error('获取配置失败:', error);

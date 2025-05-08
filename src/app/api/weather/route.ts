@@ -29,14 +29,14 @@ export async function GET(request: NextRequest) {
     let locationParam;
     if (lat && lon) {
       locationParam = `${lon},${lat}`;
-      console.log(`使用经纬度查询: ${locationParam}`);
+      console.error(`使用经纬度查询: ${locationParam}`);
     } else {
       locationParam = city;
-      console.log(`使用城市名查询: ${locationParam}`);
+      console.error(`使用城市名查询: ${locationParam}`);
     }
     
     // 获取城市ID
-    console.log(`开始请求城市查询API...`);
+    console.error(`开始请求城市查询API...`);
     const locationResponse = await fetch(
       `https://geoapi.qweather.com/v2/city/lookup?location=${encodeURIComponent(locationParam || '')}&key=${apiKey}`
     );
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     }
     
     const locationData = await locationResponse.json();
-    console.log('城市查询响应:', JSON.stringify(locationData).substring(0, 200) + '...');
+    console.error('城市查询响应:', JSON.stringify(locationData).substring(0, 200) + '...');
     
     if (locationData.code !== '200' || !locationData.location || locationData.location.length === 0) {
       console.error('城市查询响应异常:', JSON.stringify(locationData));
@@ -61,10 +61,10 @@ export async function GET(request: NextRequest) {
     const locationId = locationData.location[0].id;
     const cityName = locationData.location[0].name;
     
-    console.log(`找到位置: ${cityName}, ID: ${locationId}`);
+    console.error(`找到位置: ${cityName}, ID: ${locationId}`);
     
     // 获取实时天气
-    console.log(`开始请求实时天气数据...`);
+    console.error(`开始请求实时天气数据...`);
     const weatherResponse = await fetch(
       `https://devapi.qweather.com/v7/weather/now?location=${locationId}&key=${apiKey}`
     );
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
     }
     
     const weatherData = await weatherResponse.json();
-    console.log('天气数据响应:', JSON.stringify(weatherData).substring(0, 200) + '...');
+    console.error('天气数据响应:', JSON.stringify(weatherData).substring(0, 200) + '...');
     
     if (weatherData.code !== '200') {
       console.error('天气数据响应异常:', JSON.stringify(weatherData));
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
     }
     
     // 获取今日天气预报（最高温和最低温）
-    console.log(`开始请求天气预报数据...`);
+    console.error(`开始请求天气预报数据...`);
     const forecastResponse = await fetch(
       `https://devapi.qweather.com/v7/weather/3d?location=${locationId}&key=${apiKey}`
     );
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
     }
     
     const forecastData = await forecastResponse.json();
-    console.log('天气预报响应:', JSON.stringify(forecastData).substring(0, 200) + '...');
+    console.error('天气预报响应:', JSON.stringify(forecastData).substring(0, 200) + '...');
     
     let tempMin = null;
     let tempMax = null;
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
       tempMin = isNaN(minTemp) ? null : minTemp;
       tempMax = isNaN(maxTemp) ? null : maxTemp;
     } else {
-      console.warn('天气预报响应异常或为空:', JSON.stringify(forecastData));
+      console.error('天气预报响应异常或为空:', JSON.stringify(forecastData));
     }
     
     // 返回处理后的天气数据
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
       tempMax
     };
     
-    console.log(`天气数据处理完成:`, result);
+    console.error(`天气数据处理完成:`, result);
     return NextResponse.json(result);
   } catch (error) {
     // 详细记录错误信息

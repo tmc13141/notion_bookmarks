@@ -15,20 +15,20 @@
   background-color: hsl(222.2 84% 4.9%);
   color: hsl(210 40% 98%);
   font-family: 'Noto Sans SC', var(--font-family);
-}
-
-/* 卡片基础样式 */
-[data-theme^="simple"] .group {
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  border: var(--border-width) var(--border-style) var(--border);
   transition: all 0.2s ease-out;
+  border-radius: var(--radius);
+  box-shadow: none;
+  border: var(--border-width) var(--border-style) var(--border);
+  transition: box-shadow 0.2s cubic-bezier(0.16,1,0.3,1), border-color 0.2s cubic-bezier(0.16,1,0.3,1), transform 0.2s cubic-bezier(0.16,1,0.3,1);
+  overflow: hidden;
 }
 
 /* 卡片悬浮效果 */
 [data-theme^="simple"] .group:hover {
   box-shadow: var(--shadow-md);
+  border-color: transparent;
   transform: translateY(-1px);
+  z-index: 2;
 }
 
 /* 标题文本效果 */

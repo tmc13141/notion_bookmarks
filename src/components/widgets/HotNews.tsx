@@ -90,8 +90,9 @@ export default function HotNews() {
       {/* 热搜列表 - 优化间距和布局 */}
       <div className="flex-1 overflow-y-auto py-1.5 px-2 space-y-0.5">
         {loading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent" />
+          <div className="flex flex-col items-center justify-center h-full w-full">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p className="text-sm">获取热搜数据...</p>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center h-full text-sm text-destructive">

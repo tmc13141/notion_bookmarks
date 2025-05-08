@@ -12,6 +12,16 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // 优化资源加载
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['@tabler/icons-react', 'framer-motion'],
+  },
+  // 优化预加载
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
 };
 
 export default nextConfig;

@@ -156,7 +156,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
               }
             }
           } catch (geoError) {
-            console.log('地理位置获取失败，尝试IP定位', geoError);
+            console.error('地理位置获取失败，尝试IP定位', geoError);
             
             // 尝试IP定位
             try {
@@ -185,7 +185,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
                 throw new Error(`IP服务请求失败: ${ipResponse.status}`);
               }
             } catch (ipError) {
-              console.log('IP定位失败，使用默认城市', ipError);
+              console.error('IP定位失败，使用默认城市', ipError);
               // 使用默认城市
             }
           }
@@ -457,7 +457,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
                 value={customCity}
                 onChange={(e) => setCustomCity(e.target.value)}
                 placeholder="输入城市名称"
-                className="flex-1 text-xs p-1 border border-border/40 rounded bg-background/80 focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-24 text-xs p-1 border border-border/40 rounded bg-background/80 focus:outline-none focus:ring-1 focus:ring-primary"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -471,7 +471,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
                   e.stopPropagation();
                   handleCitySelect();
                 }}
-                className="ml-1 p-1 text-xs bg-primary text-primary-foreground rounded focus:outline-none transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none"
+                className="ml-1 px-4 h-7 text-xs font-medium bg-primary text-primary-foreground rounded shadow-sm focus:outline-none transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center"
                 disabled={!customCity.trim()}
               >
                 确定

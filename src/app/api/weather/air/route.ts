@@ -45,7 +45,7 @@ export async function GET(request: Request) {
       );
     }
     
-    console.log(`使用${locationType}请求空气质量数据: ${apiUrl.replace(apiKey, 'API_KEY')}`);
+    console.error(`使用${locationType}请求空气质量数据: ${apiUrl.replace(apiKey, 'API_KEY')}`);
     
     const airResponse = await fetch(apiUrl);
     
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
     }
     
     const airData = await airResponse.json();
-    console.log('空气质量数据响应:', JSON.stringify(airData).substring(0, 200) + '...');
+    console.error('空气质量数据响应:', JSON.stringify(airData).substring(0, 200) + '...');
     
     // 检查接口返回状态码
     if (airData.code && airData.code !== '200') {
@@ -85,7 +85,7 @@ export async function GET(request: Request) {
         }
       };
       
-      console.log(`空气质量数据处理完成 (v7 API):`, result);
+      console.error(`空气质量数据处理完成 (v7 API):`, result);
       return NextResponse.json(result);
     }
     
@@ -115,7 +115,7 @@ export async function GET(request: Request) {
       primaryPollutant: aqiIndex.primaryPollutant
     };
     
-    console.log(`空气质量数据处理完成 (v1 API):`, result);
+    console.error(`空气质量数据处理完成 (v1 API):`, result);
     return NextResponse.json(result);
   } catch (error) {
     // 详细记录错误信息

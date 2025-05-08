@@ -22,19 +22,60 @@ export default function IPInfo() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchIPData = async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setLoading(true);
-      setError(null);
+      // 创建一个新的IPData对象
+      const newIPData: IPData = {
+        domestic: {
+          ip: '获取中...',
+          location: '获取中...'
+        },
+        overseas: {
+          ip: '获取中...',
+          location: '获取中...'
+        }
+      };
       
-      const response = await fetch('/api/ip', { 
-        cache: 'no-store'
-      });
+      // 获取国内IP信息
+      try {
+        const response = await fetch('/api/ip/domestic', {
+          cache: 'no-store'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`服务响应错误: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        newIPData.domestic = {
+          ip: data.ip || '未知IP',
+          location: data.location || '未知位置'
+        };
+      } catch (error) {
+        console.error('获取国内IP失败:', error);
+        newIPData.domestic.error = '获取失败';
+      }
       
-      const data = await response.json();
-      
-      if (!response.ok) {
-        setError(data.error || '服务暂时不可用');
-        return;
+      // 获取海外IP信息
+      try {
+        const response = await fetch('/api/ip/overseas', {
+          cache: 'no-store'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`服务响应错误: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        newIPData.overseas = {
+          ip: data.ip || '未知IP',
+          location: data.location || '未知位置'
+        };
+      } catch (error) {
+        console.error('获取海外IP失败:', error);
+        newIPData.overseas.error = '获取失败';
       }
       
       setIpData(data);

@@ -207,8 +207,8 @@ export const getWebsiteConfig = cache(async () => {
             // 分析和统计
             CLARITY_ID: configMap.CLARITY_ID ?? '',
             GA_ID: configMap.GA_ID ?? '',
-            // 缓存配置
-            
+            // 新增widgets配置
+            WIDGET_CONFIG: configMap.WIDGET_CONFIG ?? '',
         };
 
         return config;

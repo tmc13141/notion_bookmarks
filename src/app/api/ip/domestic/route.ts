@@ -16,14 +16,14 @@ export async function GET(req: NextRequest) {
   // 如果是本地开发环境，使用备用公共IP进行测试
   if (isReservedIP && process.env.NODE_ENV === 'development') {
     ip = '8.8.8.8';
-    console.log('本地开发环境检测到保留IP地址，使用备用IP:', ip);
+    console.error('本地开发环境检测到保留IP地址，使用备用IP:', ip);
   } else {
-    console.log('用户IP地址:', ip);
+    console.error('用户IP地址:', ip);
   }
 
   // 使用 PC Online 的免费 IP 查询服务
   try {
-    console.log('尝试获取IP信息...');
+    console.error('尝试获取IP信息...');
     const response = await fetch(`https://whois.pconline.com.cn/ipJson.jsp?ip=${encodeURIComponent(ip)}&json=true`, { 
       cache: 'no-store',
       headers: {
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       region: data.pro || '未知地区'
     };
     
-    console.log('成功获取IP信息:', result);
+    console.error('成功获取IP信息:', result);
     return NextResponse.json(result, { status: 200 });
     
   } catch (error) {
