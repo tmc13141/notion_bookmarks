@@ -83,7 +83,7 @@ export default function SimpleTime() {
   if (!mounted) {
     return (
       <div className="flex flex-row items-center justify-center">
-        <div className="simple-time-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm w-[280px] h-[150px] flex items-center">
+        <div className="widget-card simple-time-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm w-[280px] h-[150px] flex items-center">
           <div className="flex items-center w-full">
             <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
               <div className="bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 text-xs text-center py-0.5">
@@ -111,7 +111,7 @@ export default function SimpleTime() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="simple-time-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm w-[280px] h-[150px] flex items-center relative overflow-hidden group"
+        className="widget-card simple-time-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm w-[280px] h-[150px] flex items-center relative overflow-hidden group"
       >
         {/* 背景装饰 - 主题感知 */}
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>

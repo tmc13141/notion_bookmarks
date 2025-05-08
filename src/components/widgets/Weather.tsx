@@ -325,7 +325,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex items-center justify-center"
+        className="widget-card weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex items-center justify-center"
       >
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
@@ -342,7 +342,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
+        className="widget-card weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
       >
         {/* 背景装饰 - 主题感知 */}
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
@@ -490,7 +490,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
+      className="widget-card weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
     >
       {/* 背景装饰 - 主题感知 */}
       <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>

@@ -39,7 +39,7 @@ export default function AnalogClock() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="analog-clock-widget p-3 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm mx-auto w-[150px] h-[150px] flex items-center justify-center group relative overflow-hidden"
+      className="widget-card analog-clock-widget p-3 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm mx-auto w-[150px] h-[150px] flex items-center justify-center group relative overflow-hidden"
     >
       {/* 背景装饰 - 主题感知 */}
       <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>

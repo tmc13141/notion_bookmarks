@@ -9,7 +9,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       attribute="data-theme"
       defaultTheme="simple-light"
       enableSystem={false}
-      forcedTheme="simple-light"
     >
       {children}
     </NextThemesProvider>

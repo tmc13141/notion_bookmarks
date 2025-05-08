@@ -18,38 +18,38 @@ export default {
     },
     extend: {
       colors: {
-        border: "hsl(var(--border-hsl))",
-        input: "hsl(var(--input-hsl))",
-        ring: "hsl(var(--ring-hsl))",
-        background: "hsl(var(--background-hsl))",
-        foreground: "hsl(var(--background-foreground-hsl))",
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
         primary: {
-          DEFAULT: "hsl(var(--primary-hsl))",
-          foreground: "hsl(var(--primary-foreground-hsl))",
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary-hsl))",
-          foreground: "hsl(var(--secondary-foreground-hsl))",
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive-hsl))",
-          foreground: "hsl(var(--destructive-foreground-hsl))",
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted-hsl))",
-          foreground: "hsl(var(--muted-foreground-hsl))",
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent-hsl))",
-          foreground: "hsl(var(--accent-foreground-hsl))",
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover-hsl))",
-          foreground: "hsl(var(--popover-foreground-hsl))",
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
         },
         card: {
-          DEFAULT: "hsl(var(--card-hsl))",
-          foreground: "hsl(var(--card-foreground-hsl))",
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
         },
       },
       borderRadius: {
