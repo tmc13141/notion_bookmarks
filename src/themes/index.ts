@@ -1,4 +1,6 @@
 import './theme.css'
+import { simpleTheme } from './simple';
+import { cyberpunkTheme } from './cyberpunk';
 
 export interface Theme {
   name: string
@@ -46,3 +48,8 @@ export function applyTheme(themeName: string) {
   // 触发主题变化事件
   window.dispatchEvent(new Event('themeChange'))
 }
+
+export { simpleTheme } from './simple';
+export { cyberpunkTheme } from './cyberpunk';
+
+export const defaultTheme = simpleTheme;
