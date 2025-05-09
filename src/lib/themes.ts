@@ -4,9 +4,5 @@
 export {
   themes,
   defaultTheme,
-  getTheme,
   getAllThemes,
-  registerTheme,
-  getThemeModes,
-  getThemeDisplayName
 } from '@/themes';
