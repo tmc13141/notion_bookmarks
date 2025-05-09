@@ -71,7 +71,7 @@ export default function Navigation({ categories, config = defaultConfig }: Navig
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center space-x-2">
             <Icons.Rocket className="w-5 h-5 text-foreground" />
-            <span className="font-medium text-foreground">{config.SITE_TITLE}</span>
+            <span className="neon-title">{config.SITE_TITLE}</span>
           </div>
           {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
         </div>
@@ -102,7 +102,7 @@ export default function Navigation({ categories, config = defaultConfig }: Navig
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-2">
             <Icons.Rocket className="w-5 h-5 text-foreground" />
-            <span className="font-medium text-foreground">{config.SITE_TITLE}</span>
+            <span className="neon-title">{config.SITE_TITLE}</span>
           </div>
           {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
         </div>

@@ -87,12 +87,13 @@
   border-radius: var(--radius);
   border: var(--border-width) var(--border-style) var(--border);
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-duration) var(--transition-timing);
+  /* transition: all var(--transition-duration) var(--transition-timing); */
 }
 
 [data-theme^="simple"] .widget-card:hover {
   box-shadow: var(--shadow-hover);
-  transform: translateY(-1px);
+  /* 移除transform，防止抖动 */
+  /* transform: translateY(-1px); */
 }
 
 [data-theme^="simple"] .platform-tab {
@@ -113,11 +114,17 @@
 }
 
 [data-theme^="simple"] .hot-news-item {
-  border-left: 2px solid transparent;
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border-radius: var(--radius);
+  border: var(--border-width) var(--border-style) var(--border);
+  box-shadow: var(--shadow-sm);
   transition: all var(--transition-duration) var(--transition-timing);
 }
 
 [data-theme^="simple"] .hot-news-item:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
   border-left-color: var(--primary);
   background: var(--accent);
 }

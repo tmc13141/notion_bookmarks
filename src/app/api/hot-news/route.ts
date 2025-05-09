@@ -235,7 +235,7 @@ export async function GET() {
   try {
     console.error('Fetching hot news...');
     const hotNews = await getCachedHotNews();
-    console.error('Hot news data:', hotNews);
+    // console.error('Hot news data:', hotNews);
     return NextResponse.json(hotNews);
   } catch (error) {
     console.error('Error in hot news API:', error);

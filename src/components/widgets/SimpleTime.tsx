@@ -111,7 +111,7 @@ export default function SimpleTime() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="widget-card simple-time-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm w-[280px] h-[150px] flex items-center relative overflow-hidden group"
+        className="widget-card simple-time-widget p-4 bg-card/80 backdrop-blur-sm w-[280px] h-[150px] flex items-center relative overflow-hidden group"
       >
         {/* 背景装饰 - 主题感知 */}
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>

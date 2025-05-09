@@ -164,7 +164,6 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
               
               if (ipResponse.ok) {
                 const ipData = await ipResponse.json();
-                console.log('IP定位返回数据:', ipData); // 添加日志以便调试
                 
                 if (ipData.location && ipData.location !== '未知位置') {
                   location = ipData.location;
@@ -173,7 +172,6 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
                   if (ipData.latitude && ipData.longitude) {
                     latitude = ipData.latitude;
                     longitude = ipData.longitude;
-                    console.log(`成功获取IP定位的经纬度: ${latitude}, ${longitude}`);
                   }
                 } else if (ipData.error) {
                   console.warn('IP定位返回错误:', ipData.error);
@@ -198,7 +196,6 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
         }
       }
       
-      console.log(`使用${locationSource}获取天气: ${location}`);
       setCurrentCity(location);
       
       // 获取天气数据
@@ -234,8 +231,6 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
       // 修复：使用城市名称获取空气质量
       if (location) {
         try {
-          console.log(`尝试获取城市 ${location} 的空气质量数据`);
-          
           // 如果有经纬度，优先使用经纬度，否则使用城市名
           let airUrl = latitude && longitude
             ? `/api/weather/air?lat=${latitude}&lon=${longitude}&city=${encodeURIComponent(location)}`
@@ -254,8 +249,6 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
               weatherDataObj.aqiCategory = airData.category;
               weatherDataObj.aqiColor = airData.color;
               weatherDataObj.primaryPollutant = airData.primaryPollutant;
-              
-              console.log('空气质量数据获取成功:', airData.aqi, airData.category);
             } else {
               console.warn('空气质量数据返回错误:', airData.error);
             }
@@ -325,7 +318,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="widget-card weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex items-center justify-center"
+        className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex items-center justify-center"
       >
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
@@ -342,7 +335,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="widget-card weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
+        className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
       >
         {/* 背景装饰 - 主题感知 */}
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
@@ -490,7 +483,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="widget-card weather-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
+      className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
     >
       {/* 背景装饰 - 主题感知 */}
       <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>

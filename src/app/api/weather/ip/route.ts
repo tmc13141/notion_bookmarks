@@ -17,9 +17,6 @@ export async function GET(request: NextRequest) {
   if (isReservedIP && process.env.NODE_ENV === 'development') {
     // 使用一个公共IP作为开发环境中的备用方案
     ip = '8.8.8.8';
-    console.error('本地开发环境检测到保留IP地址，使用备用IP:', ip);
-  } else {
-    console.error('用户IP地址:', ip);
   }
 
   // 尝试多个IP定位服务，提高可靠性
@@ -53,7 +50,6 @@ export async function GET(request: NextRequest) {
   // 依次尝试每个服务
   for (const service of services) {
     try {
-      console.error(`尝试使用 ${service.name} 获取IP信息...`);
       const response = await fetch(service.url, { 
         cache: 'no-store',
         headers: {
@@ -75,18 +71,14 @@ export async function GET(request: NextRequest) {
       
       // 转换数据并返回
       const result = service.transform(data);
-      console.error(`成功使用 ${service.name} 获取IP信息:`, result);
-      
       return NextResponse.json(result, { status: 200 });
     } catch (error) {
-      console.error(`使用 ${service.name} 获取IP信息失败:`, error);
       lastError = error as ServiceError;
-      // 继续尝试下一个服务
     }
   }
 
   // 所有服务都失败了
-  console.error('所有IP定位服务均失败');
+  console.error('IP定位接口异常:', lastError);
   return NextResponse.json(
     { 
       error: `IP定位失败: ${lastError?.message || '所有服务均不可用'}`, 

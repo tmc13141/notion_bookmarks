@@ -68,7 +68,7 @@ export default function HotNews() {
   }, [fetchHotNews]);
 
   return (
-    <div className="bg-card rounded-xl border shadow-sm h-[150px] flex flex-col">
+    <div className="widget-card border h-[150px] flex flex-col">
       {/* 平台选择器 - 减小内边距和间距 */}
       <div className="flex gap-1.5 px-2 py-1.5 overflow-x-auto border-b">
         {platforms.map(platform => (
