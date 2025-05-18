@@ -155,8 +155,8 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
                 throw new Error('位置解析失败');
               }
             }
-          } catch (geoError) {
-            console.error('地理位置获取失败，尝试IP定位', geoError);
+          } catch (error) {
+            console.error('地理位置获取失败，尝试IP定位', error);
             
             // 尝试IP定位
             try {

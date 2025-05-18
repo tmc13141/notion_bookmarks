@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     if (!apiKey) {
       console.error('未配置和风天气API密钥');
       return NextResponse.json(
-        { error: '服务器配置错误' },
+        { error: '服务器配置错误：未配置和风天气API密钥' },
         { status: 500 }
       );
     }
