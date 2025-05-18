@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -15,75 +15,74 @@ export default function IPInfo() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchIPInfo = async () => {
+  const getLocalIP = useCallback(() => {
+    return new Promise<string>((resolve, reject) => {
+      const RTCPeerConnection = window.RTCPeerConnection || 
+        (window as any).webkitRTCPeerConnection || 
+        (window as any).mozRTCPeerConnection;
+
+      if (!RTCPeerConnection) {
+        reject(new Error('WebRTC not supported'));
+        return;
+      }
+
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:stun3.l.google.com:19302' },
+          { urls: 'stun:stun4.l.google.com:19302' }
+        ]
+      });
+
+      pc.createDataChannel('');
+      pc.createOffer()
+        .then(offer => pc.setLocalDescription(offer))
+        .catch(err => reject(err));
+
+      let foundIP = false;
+      pc.onicecandidate = (ice) => {
+        if (!ice || !ice.candidate || !ice.candidate.candidate) {
+          return;
+        }
+
+        const candidate = ice.candidate.candidate;
+        const match = candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
+        if (match) {
+          const ip = match[1];
+          // 验证 IP 地址格式
+          const ipParts = ip.split('.');
+          const isValidIP = ipParts.length === 4 && 
+            ipParts.every(part => {
+              const num = parseInt(part);
+              return num >= 0 && num <= 255;
+            });
+
+          if (isValidIP && !ip.startsWith('192.168.') && !ip.startsWith('10.') && !ip.startsWith('172.')) {
+            foundIP = true;
+            pc.onicecandidate = null;
+            pc.close();
+            resolve(ip);
+          }
+        }
+      };
+
+      // 设置超时
+      setTimeout(() => {
+        if (!foundIP) {
+          pc.onicecandidate = null;
+          pc.close();
+          reject(new Error('获取本地IP超时'));
+        }
+      }, 10000);
+    });
+  }, []);
+
+  const fetchIPInfo = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-
-      // 使用 WebRTC 获取本地 IP
-      const getLocalIP = () => {
-        return new Promise<string>((resolve, reject) => {
-          const RTCPeerConnection = window.RTCPeerConnection || 
-            (window as any).webkitRTCPeerConnection || 
-            (window as any).mozRTCPeerConnection;
-
-          if (!RTCPeerConnection) {
-            reject(new Error('WebRTC not supported'));
-            return;
-          }
-
-          const pc = new RTCPeerConnection({
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' },
-              { urls: 'stun:stun2.l.google.com:19302' },
-              { urls: 'stun:stun3.l.google.com:19302' },
-              { urls: 'stun:stun4.l.google.com:19302' }
-            ]
-          });
-
-          pc.createDataChannel('');
-          pc.createOffer()
-            .then(offer => pc.setLocalDescription(offer))
-            .catch(err => reject(err));
-
-          let foundIP = false;
-          pc.onicecandidate = (ice) => {
-            if (!ice || !ice.candidate || !ice.candidate.candidate) {
-              return;
-            }
-
-            const candidate = ice.candidate.candidate;
-            const match = candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
-            if (match) {
-              const ip = match[1];
-              // 验证 IP 地址格式
-              const ipParts = ip.split('.');
-              const isValidIP = ipParts.length === 4 && 
-                ipParts.every(part => {
-                  const num = parseInt(part);
-                  return num >= 0 && num <= 255;
-                });
-
-              if (isValidIP && !ip.startsWith('192.168.') && !ip.startsWith('10.') && !ip.startsWith('172.')) {
-                foundIP = true;
-                pc.onicecandidate = null;
-                pc.close();
-                resolve(ip);
-              }
-            }
-          };
-
-          // 设置超时
-          setTimeout(() => {
-            if (!foundIP) {
-              pc.onicecandidate = null;
-              pc.close();
-              reject(new Error('获取本地IP超时'));
-            }
-          }, 10000);
-        });
-      };
 
       // 获取本地IP
       const localIP = await getLocalIP();
@@ -124,11 +123,11 @@ export default function IPInfo() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getLocalIP]);
 
   useEffect(() => {
     fetchIPInfo();
-  }, []);
+  }, [fetchIPInfo]);
 
   // 加载状态
   if (loading) {
