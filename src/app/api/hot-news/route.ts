@@ -14,7 +14,7 @@ let cache: {
   timestamp: number;
 } | null = null;
 
-const CACHE_TIME = 5 * 60 * 1000; // 5分钟
+const CACHE_TIME = 15 * 60 * 1000; // 15分钟
 
 // 获取微博热搜
 async function getWeiboHotNews(): Promise<HotNewsItem[]> {

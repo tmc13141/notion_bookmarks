@@ -52,8 +52,8 @@ export default function HotNews() {
       setActivePlatform(platforms[nextIndex].id);
     };
 
-    // 每10秒切换一次平台
-    const interval = setInterval(autoRotate, 10000);
+    // 每30秒切换一次平台
+    const interval = setInterval(autoRotate, 30000);
 
     // 当用户手动切换平台时，重置定时器
     return () => clearInterval(interval);
@@ -62,8 +62,8 @@ export default function HotNews() {
   // 获取数据
   useEffect(() => {
     fetchHotNews();
-    // 每5分钟刷新一次数据
-    const refreshInterval = setInterval(fetchHotNews, 5 * 60 * 1000);
+    // 每15分钟刷新一次数据
+    const refreshInterval = setInterval(fetchHotNews, 15 * 60 * 1000);
     return () => clearInterval(refreshInterval);
   }, [fetchHotNews]);
 
