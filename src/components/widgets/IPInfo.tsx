@@ -1,107 +1,143 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 interface IPData {
   ip: string;
   location: string;
-  error?: string;
 }
 
 export default function IPInfo() {
-  const [mounted, setMounted] = useState(false);
-  const [ipData, setIpData] = useState<{
-    current: IPData;
-    proxy: IPData;
-  } | null>(null);
+  const [currentIP, setCurrentIP] = useState<IPData>({ ip: '获取中...', location: '获取中...' });
+  const [proxyIP, setProxyIP] = useState<IPData>({ ip: '获取中...', location: '获取中...' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 确保组件只在客户端渲染
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    const fetchIPData = async () => {
+    const fetchIPInfo = async () => {
       try {
         setLoading(true);
         setError(null);
-        
-        // 使用 ipinfo.io 获取当前 IP 信息
-        const currentResponse = await fetch('https://ipinfo.io/json', {
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-        if (!currentResponse.ok) {
-          throw new Error('获取当前IP信息失败');
-        }
-        const currentData = await currentResponse.json();
-        
-        const currentIP = {
-          ip: currentData.ip || '',
-          location: [currentData.city, currentData.region, currentData.country].filter(Boolean).join(' ') || '',
-          error: currentData.error
+
+        // 使用 WebRTC 获取本地 IP
+        const getLocalIP = () => {
+          return new Promise<string>((resolve, reject) => {
+            const RTCPeerConnection = window.RTCPeerConnection || 
+              (window as any).webkitRTCPeerConnection || 
+              (window as any).mozRTCPeerConnection;
+
+            if (!RTCPeerConnection) {
+              reject(new Error('WebRTC not supported'));
+              return;
+            }
+
+            const pc = new RTCPeerConnection({
+              iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' }
+              ]
+            });
+
+            pc.createDataChannel('');
+            pc.createOffer()
+              .then(offer => pc.setLocalDescription(offer))
+              .catch(err => reject(err));
+
+            let foundIP = false;
+            pc.onicecandidate = (ice) => {
+              if (!ice || !ice.candidate || !ice.candidate.candidate) {
+                return;
+              }
+
+              const candidate = ice.candidate.candidate;
+              const match = candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
+              if (match) {
+                const ip = match[1];
+                // 验证 IP 地址格式
+                const ipParts = ip.split('.');
+                const isValidIP = ipParts.length === 4 && 
+                  ipParts.every(part => {
+                    const num = parseInt(part);
+                    return num >= 0 && num <= 255;
+                  });
+
+                if (isValidIP && !ip.startsWith('192.168.') && !ip.startsWith('10.') && !ip.startsWith('172.')) {
+                  foundIP = true;
+                  pc.onicecandidate = null;
+                  pc.close();
+                  resolve(ip);
+                }
+              }
+            };
+
+            // 设置超时
+            setTimeout(() => {
+              if (!foundIP) {
+                pc.onicecandidate = null;
+                pc.close();
+                reject(new Error('获取本地IP超时'));
+              }
+            }, 10000);
+          });
         };
 
-        // 使用我们的 API 获取代理 IP 信息
-        const proxyResponse = await fetch('/api/ip/domestic', {
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-        if (!proxyResponse.ok) {
-          throw new Error('获取代理IP信息失败');
-        }
-        const proxyData = await proxyResponse.json();
+        // 获取本地IP
+        const localIP = await getLocalIP();
+        
+        // 获取本地IP的位置信息
+        const currentLocationResponse = await fetch(`https://ipapi.co/${localIP}/json/`);
+        const currentLocationData = await currentLocationResponse.json();
 
-        // 确保数据正确映射
-        setIpData({
-          current: {
-            ip: currentData.ip || '',
-            location: [currentData.city, currentData.region, currentData.country].filter(Boolean).join(' ') || '',
-            error: currentData.error
-          },
-          proxy: {
-            ip: proxyData.ip || '',
-            location: proxyData.location || '',
-            error: proxyData.error
-          }
+        setCurrentIP({
+          ip: localIP,
+          location: currentLocationData.country_name && currentLocationData.city 
+            ? `${currentLocationData.city}, ${currentLocationData.country_name}`
+            : '未知位置'
         });
-      } catch (err) {
-        console.error('IP信息获取失败:', err);
-        setError('IP信息获取失败');
+
+        // 获取代理IP（使用 ipify.org）
+        const proxyResponse = await fetch('https://api.ipify.org?format=json');
+        const proxyData = await proxyResponse.json();
+        
+        if (!proxyData.ip) {
+          throw new Error('无法获取代理IP');
+        }
+
+        // 获取代理IP的位置信息
+        const proxyLocationResponse = await fetch(`https://ipapi.co/${proxyData.ip}/json/`);
+        const proxyLocationData = await proxyLocationResponse.json();
+
+        setProxyIP({
+          ip: proxyData.ip,
+          location: proxyLocationData.country_name && proxyLocationData.city 
+            ? `${proxyLocationData.city}, ${proxyLocationData.country_name}`
+            : '未知位置'
+        });
+
+      } catch (error) {
+        console.error('Failed to fetch IP info:', error);
+        setError('获取IP信息失败，请稍后重试');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchIPData();
-  }, [mounted]);
+    fetchIPInfo();
+  }, []);
 
-  // 在客户端渲染之前显示加载状态
-  if (!mounted) {
-    return (
-      <div className="ip-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[250px] h-[150px] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-          <p className="text-sm">加载中...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // 加载状态
   if (loading) {
     return (
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="ip-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[250px] h-[150px] flex items-center justify-center"
+        className="widget-card ip-info-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex items-center justify-center"
       >
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
@@ -111,22 +147,146 @@ export default function IPInfo() {
     );
   }
 
-  if (error || !ipData) {
+  // 错误状态
+  if (error) {
     return (
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="ip-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[250px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
+        className="widget-card ip-info-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
       >
+        {/* 背景装饰 - 主题感知 */}
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
-        <div className="relative z-10">
-          <h3 className="text-xl font-medium text-destructive">获取失败</h3>
+        
+        <div className="flex justify-between items-start relative z-10">
+          <div>
+            <h3 className="text-xl font-medium text-destructive">获取失败</h3>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="weather-icon">
+              <span className="text-2xl text-destructive">⚠️</span>
+            </div>
+          </div>
         </div>
+        
         <div className="mt-2 relative z-10">
-          <p className="text-sm text-muted-foreground break-words overflow-hidden line-clamp-3">{error || '无法获取IP信息'}</p>
+          <p className="text-sm text-muted-foreground break-words overflow-hidden line-clamp-3">{error}</p>
           <button 
-            onClick={() => window.location.reload()} 
+            onClick={() => {
+              const fetchIPInfo = async () => {
+                try {
+                  setLoading(true);
+                  setError(null);
+
+                  // 使用 WebRTC 获取本地 IP
+                  const getLocalIP = () => {
+                    return new Promise<string>((resolve, reject) => {
+                      const RTCPeerConnection = window.RTCPeerConnection || 
+                        (window as any).webkitRTCPeerConnection || 
+                        (window as any).mozRTCPeerConnection;
+
+                      if (!RTCPeerConnection) {
+                        reject(new Error('WebRTC not supported'));
+                        return;
+                      }
+
+                      const pc = new RTCPeerConnection({
+                        iceServers: [
+                          { urls: 'stun:stun.l.google.com:19302' },
+                          { urls: 'stun:stun1.l.google.com:19302' },
+                          { urls: 'stun:stun2.l.google.com:19302' },
+                          { urls: 'stun:stun3.l.google.com:19302' },
+                          { urls: 'stun:stun4.l.google.com:19302' }
+                        ]
+                      });
+
+                      pc.createDataChannel('');
+                      pc.createOffer()
+                        .then(offer => pc.setLocalDescription(offer))
+                        .catch(err => reject(err));
+
+                      let foundIP = false;
+                      pc.onicecandidate = (ice) => {
+                        if (!ice || !ice.candidate || !ice.candidate.candidate) {
+                          return;
+                        }
+
+                        const candidate = ice.candidate.candidate;
+                        const match = candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
+                        if (match) {
+                          const ip = match[1];
+                          // 验证 IP 地址格式
+                          const ipParts = ip.split('.');
+                          const isValidIP = ipParts.length === 4 && 
+                            ipParts.every(part => {
+                              const num = parseInt(part);
+                              return num >= 0 && num <= 255;
+                            });
+
+                          if (isValidIP && !ip.startsWith('192.168.') && !ip.startsWith('10.') && !ip.startsWith('172.')) {
+                            foundIP = true;
+                            pc.onicecandidate = null;
+                            pc.close();
+                            resolve(ip);
+                          }
+                        }
+                      };
+
+                      // 设置超时
+                      setTimeout(() => {
+                        if (!foundIP) {
+                          pc.onicecandidate = null;
+                          pc.close();
+                          reject(new Error('获取本地IP超时'));
+                        }
+                      }, 10000);
+                    });
+                  };
+
+                  // 获取本地IP
+                  const localIP = await getLocalIP();
+                  
+                  // 获取本地IP的位置信息
+                  const currentLocationResponse = await fetch(`https://ipapi.co/${localIP}/json/`);
+                  const currentLocationData = await currentLocationResponse.json();
+
+                  setCurrentIP({
+                    ip: localIP,
+                    location: currentLocationData.country_name && currentLocationData.city 
+                      ? `${currentLocationData.city}, ${currentLocationData.country_name}`
+                      : '未知位置'
+                  });
+
+                  // 获取代理IP（使用 ipify.org）
+                  const proxyResponse = await fetch('https://api.ipify.org?format=json');
+                  const proxyData = await proxyResponse.json();
+                  
+                  if (!proxyData.ip) {
+                    throw new Error('无法获取代理IP');
+                  }
+
+                  // 获取代理IP的位置信息
+                  const proxyLocationResponse = await fetch(`https://ipapi.co/${proxyData.ip}/json/`);
+                  const proxyLocationData = await proxyLocationResponse.json();
+
+                  setProxyIP({
+                    ip: proxyData.ip,
+                    location: proxyLocationData.country_name && proxyLocationData.city 
+                      ? `${proxyLocationData.city}, ${proxyLocationData.country_name}`
+                      : '未知位置'
+                  });
+
+                } catch (error) {
+                  console.error('Failed to fetch IP info:', error);
+                  setError('获取IP信息失败，请稍后重试');
+                } finally {
+                  setLoading(false);
+                }
+              };
+
+              fetchIPInfo();
+            }}
             className="mt-2 text-xs text-primary hover:underline focus:outline-none"
           >
             点击重试
@@ -136,41 +296,36 @@ export default function IPInfo() {
     );
   }
 
+  // 正常显示IP信息
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="ip-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm text-card-foreground w-[250px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
+      className="widget-card ip-info-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
     >
+      {/* 背景装饰 - 主题感知 */}
       <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
-      <div className="relative z-10 space-y-3 text-xs">
-        <div>
-          <h3 className="text-xs font-medium mb-1">当前IP</h3>
-          <div className="text-xs">
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <span className="inline-block w-14">IP地址:</span>
-              <span className="font-medium text-foreground truncate max-w-[120px]">{ipData.current.ip || '未知'}</span>
-            </div>
-            <div className="flex items-center gap-1 text-muted-foreground break-all whitespace-pre-line text-[11px] leading-snug">
-              <span className="inline-block w-14">归属地:</span>
-              <span className="truncate max-w-[120px]">{ipData.current.location || '未知'}</span>
-            </div>
-            {ipData.current.error && <div className="text-destructive text-xs">{ipData.current.error}</div>}
+      
+      <div className="flex justify-between items-start relative z-10">
+        <div className="flex items-center space-x-1">
+          <div className="weather-icon text-primary">
+            <i className="qi-location text-2xl"></i>
           </div>
         </div>
-        <div>
-          <h3 className="text-xs font-medium mb-1">代理IP</h3>
-          <div className="text-xs">
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <span className="inline-block w-14">IP地址:</span>
-              <span className="font-medium text-foreground truncate max-w-[120px]">{ipData.proxy.ip || '未知'}</span>
-            </div>
-            <div className="flex items-center gap-1 text-muted-foreground break-all whitespace-pre-line text-[11px] leading-snug">
-              <span className="inline-block w-14">归属地:</span>
-              <span className="truncate max-w-[120px]">{ipData.proxy.location || '未知'}</span>
-            </div>
-            {ipData.proxy.error && <div className="text-destructive text-xs">{ipData.proxy.error}</div>}
+      </div>
+      
+      <div className="relative z-10">
+        <div className="space-y-2">
+          <div>
+            <p className="text-xs text-muted-foreground">当前IP</p>
+            <p className="text-sm font-medium">{currentIP.ip}</p>
+            <p className="text-xs text-muted-foreground">{currentIP.location}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">代理IP</p>
+            <p className="text-sm font-medium">{proxyIP.ip}</p>
+            <p className="text-xs text-muted-foreground">{proxyIP.location}</p>
           </div>
         </div>
       </div>

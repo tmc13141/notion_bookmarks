@@ -106,7 +106,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
   }, [showCitySelector]);
 
   // 获取天气数据
-  const fetchWeatherData = async (city = currentCity) => {
+  const fetchWeatherData = async (city: string) => {
     setLoading(true);
     setError(null);
     
@@ -132,6 +132,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
           locationSource = '默认城市';
           
           try {
+            // 先尝试使用浏览器定位
             if (navigator.geolocation) {
               const position = await new Promise<GeolocationPosition>((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(resolve, reject, {
@@ -151,15 +152,11 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
               if (geoData.location && geoData.location !== '未知位置') {
                 location = geoData.location;
                 locationSource = '位置服务';
-              } else {
-                throw new Error('位置解析失败');
               }
             }
-          } catch (error) {
-            console.error('地理位置获取失败，尝试IP定位', error);
             
-            // 尝试IP定位
-            try {
+            // 如果浏览器定位失败，尝试使用 IP 定位
+            if (location === defaultCity) {
               const ipResponse = await fetch('/api/weather/ip');
               
               if (ipResponse.ok) {
@@ -173,21 +170,14 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
                     latitude = ipData.latitude;
                     longitude = ipData.longitude;
                   }
-                } else if (ipData.error) {
-                  console.warn('IP定位返回错误:', ipData.error);
-                  throw new Error(ipData.error);
-                } else {
-                  throw new Error('IP定位未返回有效位置');
                 }
-              } else {
-                throw new Error(`IP服务请求失败: ${ipResponse.status}`);
               }
-            } catch (ipError) {
-              console.error('IP定位失败，使用默认城市', ipError);
-              // 使用默认城市
-              location = defaultCity;
-              locationSource = '默认城市';
             }
+          } catch (error) {
+            console.error('位置获取失败:', error);
+            // 使用默认城市
+            location = defaultCity;
+            locationSource = '默认城市';
           }
         }
       } else {
@@ -230,7 +220,6 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
       };
       
       // 如果有经纬度，尝试获取空气质量数据
-      // 修复：使用城市名称获取空气质量
       if (location) {
         try {
           // 如果有经纬度，优先使用经纬度，否则使用城市名
