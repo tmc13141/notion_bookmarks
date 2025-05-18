@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,9 +24,19 @@ export default function HotNews() {
   const [news, setNews] = useState<HotNewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [allNews, setAllNews] = useState<Record<string, HotNewsItem[]>>({});
+  const lastFetchTime = useRef<number>(0);
+  const CACHE_TIME = 15 * 60 * 1000; // 15分钟
 
   // 获取数据的函数
-  const fetchHotNews = useCallback(async () => {
+  const fetchHotNews = useCallback(async (force = false) => {
+    const now = Date.now();
+    // 如果数据在缓存时间内且不是强制刷新，直接使用缓存数据
+    if (!force && now - lastFetchTime.current < CACHE_TIME && Object.keys(allNews).length > 0) {
+      setNews(allNews[activePlatform] || []);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -35,14 +45,23 @@ export default function HotNews() {
         throw new Error('获取热搜数据失败');
       }
       const data = await response.json();
+      setAllNews(data);
       setNews(data[activePlatform] || []);
+      lastFetchTime.current = now;
     } catch (error) {
       console.error('Failed to fetch hot news:', error);
       setError('获取热搜数据失败，请稍后重试');
     } finally {
       setLoading(false);
     }
-  }, [activePlatform]);
+  }, []);
+
+  // 当平台切换时更新显示的数据
+  useEffect(() => {
+    if (allNews[activePlatform]) {
+      setNews(allNews[activePlatform]);
+    }
+  }, [activePlatform, allNews]);
 
   // 自动轮播
   useEffect(() => {
@@ -63,7 +82,7 @@ export default function HotNews() {
   useEffect(() => {
     fetchHotNews();
     // 每15分钟刷新一次数据
-    const refreshInterval = setInterval(fetchHotNews, 15 * 60 * 1000);
+    const refreshInterval = setInterval(() => fetchHotNews(true), 15 * 60 * 1000);
     return () => clearInterval(refreshInterval);
   }, [fetchHotNews]);
 
