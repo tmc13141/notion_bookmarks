@@ -185,6 +185,8 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
             } catch (ipError) {
               console.error('IP定位失败，使用默认城市', ipError);
               // 使用默认城市
+              location = defaultCity;
+              locationSource = '默认城市';
             }
           }
         }
