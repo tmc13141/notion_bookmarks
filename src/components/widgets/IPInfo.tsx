@@ -25,20 +25,28 @@ export default function IPInfo() {
     setLoading(true);
     setError(null);
     Promise.all([
-      fetch('/api/ip/domestic').then(res => res.json()).catch(() => null),
-      fetch('/api/ip/overseas').then(res => res.json()).catch(() => null)
+      // 国内 IP 查询 - 使用我们的 API 端点
+      fetch('/api/ip/domestic')
+        .then(res => res.json())
+        .then(data => ({
+          ip: data.ip || '',
+          location: data.location || '',
+          error: data.error
+        }))
+        .catch(() => ({ ip: '', location: '', error: '获取失败' })),
+      // 海外 IP 查询
+      fetch('https://ipinfo.io/json')
+        .then(res => res.json())
+        .then(data => ({
+          ip: data.ip || '',
+          location: [data.city, data.region, data.country].filter(Boolean).join(' ') || '',
+          error: data.error
+        }))
+        .catch(() => ({ ip: '', location: '', error: '获取失败' }))
     ]).then(([domestic, overseas]) => {
       setIpData({
-        domestic: {
-          ip: (domestic && domestic.ip) || '获取失败',
-          location: (domestic && domestic.location) || '获取失败',
-          error: domestic && domestic.error
-        },
-        overseas: {
-          ip: (overseas && overseas.ip) || '获取失败',
-          location: (overseas && overseas.location) || '获取失败',
-          error: overseas && overseas.error
-        }
+        domestic,
+        overseas
       });
       setLoading(false);
     }).catch(() => {
