@@ -7,7 +7,8 @@
 <details>
   <summary> 2025/5/19</summary>
  - 2025/5/19 新增小组件功能，简易时钟/天气/圆形时钟/IP信息/热搜</br>
-  <img width="800" alt="demo" src="https://github.com/user-attachments/assets/c94456fc-fc4f-4d10-bd64-1a0df53af1ba" />
+  <img width="800" alt="demo" src="https://github.com/user-attachments/assets/d81be672-06b9-4df9-b1ec-a80d406284c0" />
+  <img width="800" alt="demo" src="https://github.com/user-attachments/assets/31266996-f917-4e6e-8f04-1f6743c9bf32" />
 </details>
 
 <details>
