@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher'
 import * as Icons from 'lucide-react'
 import { WebsiteConfig } from '@/types/notion'
+import { useTheme } from 'next-themes'
 
 interface Category {
   id: string
@@ -32,6 +33,7 @@ const defaultConfig: WebsiteConfig = {
 export default function Navigation({ categories, config = defaultConfig }: NavigationProps) {
   const [activeCategory, setActiveCategory] = useState<string>('')
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
+  const { theme } = useTheme(); // Get current theme
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => {
@@ -64,10 +66,17 @@ export default function Navigation({ categories, config = defaultConfig }: Navig
     }
   };
 
+  // Set default active category on mount
+  useEffect(() => {
+    if (categories.length > 0 && activeCategory === '') {
+      setActiveCategory(categories[0].id);
+    }
+  }, [categories, activeCategory]);
+
   return (
     <>
       {/* 移动端顶部导航 */}
-      <nav className="lg:hidden fixed top-0 left-0 right-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <nav className="lg:hidden fixed top-0 left-0 right-0 z-20 bg-background border-b">
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center space-x-2">
             <Icons.Rocket className="w-5 h-5 text-foreground" />
@@ -85,8 +94,12 @@ export default function Navigation({ categories, config = defaultConfig }: Navig
                   className={cn(
                     "whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors shrink-0",
                     activeCategory === category.id
-                      ? "bg-primary text-white font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      ? theme === 'simple-dark' 
+                        ? "bg-primary text-primary-foreground font-medium"
+                        : "bg-primary text-white font-medium"
+                      : theme === 'simple-dark'
+                        ? "bg-transparent text-muted-foreground hover:text-foreground hover:bg-accent"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
                   )}
                 >
                   {category.name}
@@ -106,7 +119,7 @@ export default function Navigation({ categories, config = defaultConfig }: Navig
           </div>
           {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
         </div>
-        <ul className="space-y-1">
+        <ul className="space-y-1 pb-24">
           {categories.map((category) => {
             const IconComponent = category.iconName && (category.iconName in Icons)
               ? (Icons[category.iconName as keyof typeof Icons] as React.ComponentType)

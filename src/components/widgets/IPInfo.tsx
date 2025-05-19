@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 
 interface IPData {
-  ip: string;
-  location: string;
+    ip: string;
+    location: string;
 }
 
 // 将 WebRTC 相关函数移到组件外部
@@ -53,7 +53,7 @@ const getLocalIP = () => {
           pc.onicecandidate = null;
           pc.close();
           resolve(ip);
-        }
+}
       }
     };
 
@@ -78,8 +78,8 @@ export default function IPInfo() {
 
     const fetchIPInfo = async () => {
       try {
-        setLoading(true);
-        setError(null);
+    setLoading(true);
+    setError(null);
 
         // 获取本地IP
         const localIP = await getLocalIP();
@@ -146,7 +146,7 @@ export default function IPInfo() {
         }
       } finally {
         if (mounted) {
-          setLoading(false);
+      setLoading(false);
         }
       }
     };
@@ -166,7 +166,7 @@ export default function IPInfo() {
     setProxyIP({ ip: '获取中...', location: '获取中...' });
   };
 
-  return (
+    return (
     <div className="widget-card ip-info-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group animate-fade-in">
       <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
       
@@ -179,8 +179,8 @@ export default function IPInfo() {
         <>
           <div className="flex justify-between items-start relative z-10">
             <div>
-              <h3 className="text-xl font-medium text-destructive">获取失败</h3>
-            </div>
+          <h3 className="text-xl font-medium text-destructive">获取失败</h3>
+        </div>
             <div className="flex items-center space-x-1">
               <div className="weather-icon">
                 <span className="text-2xl text-destructive">⚠️</span>
@@ -188,15 +188,15 @@ export default function IPInfo() {
             </div>
           </div>
           
-          <div className="mt-2 relative z-10">
-            <p className="text-sm text-muted-foreground break-words overflow-hidden line-clamp-3">{error}</p>
-            <button 
+        <div className="mt-2 relative z-10">
+          <p className="text-sm text-muted-foreground break-words overflow-hidden line-clamp-3">{error}</p>
+          <button 
               onClick={handleRetry}
-              className="mt-2 text-xs text-primary hover:underline focus:outline-none"
-            >
-              点击重试
-            </button>
-          </div>
+            className="mt-2 text-xs text-primary hover:underline focus:outline-none"
+          >
+            点击重试
+          </button>
+        </div>
         </>
       ) : (
         <>
@@ -204,7 +204,7 @@ export default function IPInfo() {
             <div className="flex items-center space-x-1">
               <div className="weather-icon text-primary">
                 <i className="qi-location text-2xl"></i>
-              </div>
+            </div>
             </div>
           </div>
           
@@ -214,16 +214,16 @@ export default function IPInfo() {
                 <p className="text-xs text-muted-foreground">当前IP</p>
                 <p className="text-sm font-medium">{currentIP.ip}</p>
                 <p className="text-xs text-muted-foreground">{currentIP.location}</p>
-              </div>
-              <div>
+        </div>
+        <div>
                 <p className="text-xs text-muted-foreground">代理IP</p>
                 <p className="text-sm font-medium">{proxyIP.ip}</p>
                 <p className="text-xs text-muted-foreground">{proxyIP.location}</p>
-              </div>
+            </div>
             </div>
           </div>
         </>
       )}
-    </div>
+      </div>
   );
 }

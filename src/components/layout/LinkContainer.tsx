@@ -88,9 +88,9 @@ export default function LinkContainer({
                     </h3>
                     <div className="text-sm text-muted-foreground">({links.length})</div>
                   </div>
-                  <div className="grid gap-3 w-full [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 w-full">
                     {links.map((link) => (
-                      <LinkCard key={link.id} link={link} />
+                      <LinkCard key={link.id} link={link} className="w-full" />
                     ))}
                   </div>
                 </div>

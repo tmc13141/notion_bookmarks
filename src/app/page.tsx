@@ -80,7 +80,7 @@ export default async function HomePage() {
         <Navigation categories={categoriesWithSubs} config={config} />
       </nav>
       {/* PC端侧边栏导航 */}
-      <aside className="fixed left-0 top-0 w-[300px] h-screen z-20  hidden lg:block">
+      <aside className="fixed left-0 top-0 w-[300px] h-screen z-20  hidden lg:block pb-24">
         <Navigation categories={categoriesWithSubs} config={config} />
       </aside>
       <main className="ml-0 lg:ml-[300px] pt-[56px] lg:pt-4 min-h-screen flex flex-col">
@@ -91,7 +91,7 @@ export default async function HomePage() {
             </WidgetsContainer>
           </div>
         )}
-        <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 lg:pt-0 pb-24">
+        <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 lg:pt-0 pb-24 pt-16">
           <LinkContainer 
             initialLinks={processedLinks} 
             enabledCategories={enabledCategories}
