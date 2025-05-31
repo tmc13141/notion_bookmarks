@@ -50,6 +50,10 @@ export default function Navigation({ categories, config = defaultConfig }: Navig
   // 处理导航点击
   const handleNavClick = (categoryId: string, subCategoryId?: string) => {
     setActiveCategory(categoryId);
+    
+    // 确保在客户端环境中执行DOM操作
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    
     const elementId = subCategoryId ? `${categoryId}-${subCategoryId}` : categoryId;
     const element = document.getElementById(elementId);
     

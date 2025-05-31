@@ -17,6 +17,9 @@ interface LinkCardProps {
 function Tooltip({ content, show, x, y }: { content: string; show: boolean; x: number; y: number }) {
   if (!show) return null;
   
+  // 确保在客户端环境中执行
+  if (typeof window === 'undefined' || typeof document === 'undefined') return null;
+  
   return createPortal(
     <div 
       className="fixed p-2 rounded-lg bg-popover/95 backdrop-blur supports-[backdrop-filter]:bg-popover/85

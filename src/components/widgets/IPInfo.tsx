@@ -10,6 +10,12 @@ interface IPData {
 // 将 WebRTC 相关函数移到组件外部
 const getLocalIP = () => {
   return new Promise<string>((resolve, reject) => {
+    // 确保在客户端环境中执行
+    if (typeof window === 'undefined') {
+      reject(new Error('服务端环境不支持WebRTC'));
+      return;
+    }
+    
     const RTCPeerConnection = window.RTCPeerConnection || 
       (window as any).webkitRTCPeerConnection || 
       (window as any).mozRTCPeerConnection;
@@ -68,121 +74,134 @@ const getLocalIP = () => {
 };
 
 export default function IPInfo() {
+  const [hasMounted, setHasMounted] = useState(false);
   const [currentIP, setCurrentIP] = useState<IPData>({ ip: '获取中...', location: '获取中...' });
   const [proxyIP, setProxyIP] = useState<IPData>({ ip: '获取中...', location: '获取中...' });
   const [currentIPError, setCurrentIPError] = useState<string | null>(null);
   const [proxyIPError, setProxyIPError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let mounted = true;
+  const fetchIPInfo = async () => {
+    // 确保在客户端环境中执行
+    if (typeof window === 'undefined') return;
+    
+    setLoading(true);
+    setCurrentIPError(null);
+    setProxyIPError(null);
 
-    const fetchIPInfo = async () => {
-      setLoading(true);
-      setCurrentIPError(null);
-      setProxyIPError(null);
-
-      // 获取当前IP
-      const fetchCurrentIP = async () => {
-        try {
-          const localIP = await getLocalIP();
-          
-          // 获取本地IP的位置信息
-          const currentLocationResponse = await fetch(`https://ipapi.co/${localIP}/json/`, {
-            headers: { 'Accept': 'application/json' }
-          });
-          
-          if (!currentLocationResponse.ok) {
-            throw new Error('获取位置信息失败');
-          }
-          
-          const currentLocationData = await currentLocationResponse.json();
-
-          if (mounted) {
-            setCurrentIP({
-              ip: localIP,
-              location: currentLocationData.country_name && currentLocationData.city 
-                ? `${currentLocationData.city}, ${currentLocationData.country_name}`
-                : '未知位置'
-            });
-          }
-        } catch (error) {
-          if (mounted) {
-            console.error('Failed to fetch current IP:', error);
-            setCurrentIPError(error instanceof Error ? error.message : '获取当前IP失败');
-            setCurrentIP({ ip: '未获取到', location: '未获取到' });
-          }
+    // 获取当前IP
+    const fetchCurrentIP = async () => {
+      try {
+        const localIP = await getLocalIP();
+        
+        // 获取本地IP的位置信息
+        const currentLocationResponse = await fetch(`https://ipapi.co/${localIP}/json/`, {
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        if (!currentLocationResponse.ok) {
+          throw new Error('获取位置信息失败');
         }
-      };
+        
+        const currentLocationData = await currentLocationResponse.json();
 
-      // 获取代理IP
-      const fetchProxyIP = async () => {
-        try {
-          const proxyResponse = await fetch('https://api.ipify.org?format=json', {
-            headers: { 'Accept': 'application/json' }
-          });
-          
-          if (!proxyResponse.ok) {
-            throw new Error('获取代理IP失败');
-          }
-          
-          const proxyData = await proxyResponse.json();
-          
-          if (!proxyData.ip) {
-            throw new Error('无法获取代理IP');
-          }
-
-          // 获取代理IP的位置信息
-          const proxyLocationResponse = await fetch(`https://ipapi.co/${proxyData.ip}/json/`, {
-            headers: { 'Accept': 'application/json' }
-          });
-          
-          if (!proxyLocationResponse.ok) {
-            throw new Error('获取代理位置信息失败');
-          }
-          
-          const proxyLocationData = await proxyLocationResponse.json();
-
-          if (mounted) {
-            setProxyIP({
-              ip: proxyData.ip,
-              location: proxyLocationData.country_name && proxyLocationData.city 
-                ? `${proxyLocationData.city}, ${proxyLocationData.country_name}`
-                : '未知位置'
-            });
-          }
-        } catch (error) {
-          if (mounted) {
-            console.error('Failed to fetch proxy IP:', error);
-            setProxyIPError(error instanceof Error ? error.message : '获取代理IP失败');
-            setProxyIP({ ip: '未获取到', location: '未获取到' });
-          }
-        }
-      };
-
-      // 并行获取两个IP信息
-      await Promise.all([fetchCurrentIP(), fetchProxyIP()]);
-      
-      if (mounted) {
-        setLoading(false);
+        setCurrentIP({
+          ip: localIP,
+          location: currentLocationData.country_name && currentLocationData.city 
+            ? `${currentLocationData.city}, ${currentLocationData.country_name}`
+            : '未知位置'
+        });
+      } catch (error) {
+        console.error('Failed to fetch current IP:', error);
+        setCurrentIPError(error instanceof Error ? error.message : '获取当前IP失败');
+        setCurrentIP({ ip: '未获取到', location: '未获取到' });
       }
     };
 
-    fetchIPInfo();
+    // 获取代理IP
+    const fetchProxyIP = async () => {
+      try {
+        const proxyResponse = await fetch('https://api.ipify.org?format=json', {
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        if (!proxyResponse.ok) {
+          throw new Error('获取代理IP失败');
+        }
+        
+        const proxyData = await proxyResponse.json();
+        
+        if (!proxyData.ip) {
+          throw new Error('无法获取代理IP');
+        }
 
-    return () => {
-      mounted = false;
+        // 获取代理IP的位置信息
+        const proxyLocationResponse = await fetch(`https://ipapi.co/${proxyData.ip}/json/`, {
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        if (!proxyLocationResponse.ok) {
+          throw new Error('获取代理位置信息失败');
+        }
+        
+        const proxyLocationData = await proxyLocationResponse.json();
+
+        setProxyIP({
+          ip: proxyData.ip,
+          location: proxyLocationData.country_name && proxyLocationData.city 
+            ? `${proxyLocationData.city}, ${proxyLocationData.country_name}`
+            : '未知位置'
+        });
+      } catch (error) {
+        console.error('Failed to fetch proxy IP:', error);
+        setProxyIPError(error instanceof Error ? error.message : '获取代理IP失败');
+        setProxyIP({ ip: '未获取到', location: '未获取到' });
+      }
     };
-  }, []);
 
-  const handleRetry = () => {
-    setLoading(true);
-    // 重新触发 useEffect
-    setCurrentIP({ ip: '获取中...', location: '获取中...' });
-    setProxyIP({ ip: '获取中...', location: '获取中...' });
+    // 并行获取两个IP信息
+    await Promise.all([fetchCurrentIP(), fetchProxyIP()]);
+    
+    setLoading(false);
   };
 
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMounted) return;
+    
+    fetchIPInfo();
+  }, [hasMounted]);
+
+  const handleRetry = () => {
+    if (!hasMounted || typeof window === 'undefined') return;
+    
+    setLoading(true);
+    setCurrentIPError(null);
+    setProxyIPError(null);
+    setCurrentIP({ ip: '获取中...', location: '获取中...' });
+    setProxyIP({ ip: '获取中...', location: '获取中...' });
+    
+    // 重新触发数据获取
+    fetchIPInfo();
+  };
+
+  // 服务端渲染时显示加载状态
+  if (!hasMounted) {
     return (
+      <div className="widget-card ip-info-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group animate-fade-in">
+        <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+          <p className="text-sm">获取IP信息...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="widget-card ip-info-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group animate-fade-in">
       <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
       
