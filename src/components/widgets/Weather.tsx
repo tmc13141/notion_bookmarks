@@ -69,9 +69,17 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  // 客户端挂载状态
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // 客户端渲染时设置portal容器并获取保存的城市
   useEffect(() => {
+    if (!hasMounted) return;
+    
     setPortalContainer(document.body);
     
     // 从localStorage获取保存的城市
@@ -80,10 +88,12 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
       setSavedCity(storedCity);
       setCurrentCity(storedCity);
     }
-  }, []);
+  }, [hasMounted]);
 
   // 关键修复：修改点击外部关闭菜单的逻辑
   useEffect(() => {
+    if (!hasMounted) return;
+    
     function handleClickOutside(event: MouseEvent) {
       // 如果菜单没有显示，不处理
       if (!showCitySelector) return;
@@ -103,7 +113,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showCitySelector]);
+  }, [showCitySelector, hasMounted]);
 
   // 获取天气数据
   const fetchWeatherData = async (city: string) => {
@@ -133,7 +143,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
           
           try {
             // 先尝试使用浏览器定位
-            if (navigator.geolocation) {
+            if (typeof navigator !== 'undefined' && navigator.geolocation) {
               const position = await new Promise<GeolocationPosition>((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(resolve, reject, {
                   timeout: 10000,
@@ -182,7 +192,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
         }
       } else {
         // 如果是手动选择的城市，保存到localStorage
-        if (city !== 'auto' && city !== defaultCity) {
+        if (city !== 'auto' && city !== defaultCity && typeof localStorage !== 'undefined') {
           localStorage.setItem('weatherCity', city);
           setSavedCity(city);
         }
@@ -240,15 +250,11 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
               weatherDataObj.aqiCategory = airData.category;
               weatherDataObj.aqiColor = airData.color;
               weatherDataObj.primaryPollutant = airData.primaryPollutant;
-            } else {
-              console.warn('空气质量数据返回错误:', airData.error);
             }
-          } else {
-            console.warn('空气质量数据请求失败:', airResponse.status);
+            // 空气质量数据获取失败时静默处理，不在客户端显示错误
           }
         } catch (airError) {
-          console.warn('获取空气质量数据出错:', airError);
-          // 空气质量获取失败不影响天气显示
+          // 空气质量获取失败不影响天气显示，静默处理
         }
       }
       
@@ -372,7 +378,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
 
   // 辅助函数：渲染城市选择器弹窗
   function renderCitySelector() {
-    if (!showCitySelector || !portalContainer) return null;
+    if (!hasMounted || !showCitySelector || !portalContainer) return null;
 
     // 计算弹窗位置
     const position = buttonRef.current?.getBoundingClientRect() || { left: 0, bottom: 0 };
@@ -414,7 +420,9 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
           {savedCity && (
             <button 
               onClick={() => {
-                localStorage.removeItem('weatherCity');
+                if (typeof localStorage !== 'undefined') {
+                  localStorage.removeItem('weatherCity');
+                }
                 setSavedCity(null);
                 fetchWeatherData('auto');
                 setShowCitySelector(false);

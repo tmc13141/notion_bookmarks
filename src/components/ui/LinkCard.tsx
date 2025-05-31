@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Link } from '@/types/notion';
 import { motion } from 'framer-motion';
 import { IconExternalLink } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 
@@ -49,10 +49,25 @@ function getIconUrl(link: Link): string {
   return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=128`;
 }
 
+// 获取备用图标URL的辅助函数
+function getFallbackIconUrl(link: Link): string {
+  const url = new URL(link.url);
+  return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=128`;
+}
+
 export default function LinkCard({ link, className }: LinkCardProps) {
   const [titleTooltip, setTitleTooltip] = useState({ show: false, x: 0, y: 0 });
   const [descTooltip, setDescTooltip] = useState({ show: false, x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageSrc, setImageSrc] = useState(getIconUrl(link));
+  const [imageError, setImageError] = useState(false);
+
+  // 当link变化时重置图片状态
+  useEffect(() => {
+    setImageSrc(getIconUrl(link));
+    setImageError(false);
+    setImageLoaded(false);
+  }, [link.id, link.iconfile, link.iconlink]);
 
   const handleMouseEnter = (
     event: React.MouseEvent<HTMLElement>,
@@ -98,7 +113,7 @@ export default function LinkCard({ link, className }: LinkCardProps) {
                        bg-muted/50 p-1.5 border border-border/50"
             >
               <Image
-                src={getIconUrl(link)}
+                src={imageSrc}
                 alt="Site Icon"
                 fill
                 className={cn(
@@ -107,7 +122,17 @@ export default function LinkCard({ link, className }: LinkCardProps) {
                 )}
                 sizes="40px"
                 onLoad={() => setImageLoaded(true)}
-                onError={() => setImageLoaded(true)}
+                onError={() => {
+                  if (!imageError && imageSrc !== getFallbackIconUrl(link)) {
+                    // 第一次加载失败，尝试使用备用图标
+                    setImageError(true);
+                    setImageSrc(getFallbackIconUrl(link));
+                    setImageLoaded(false);
+                  } else {
+                    // 备用图标也失败了，显示当前状态
+                    setImageLoaded(true);
+                  }
+                }}
                 loading="lazy"
               />
             </motion.div>

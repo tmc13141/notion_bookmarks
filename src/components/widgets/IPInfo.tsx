@@ -70,84 +70,101 @@ const getLocalIP = () => {
 export default function IPInfo() {
   const [currentIP, setCurrentIP] = useState<IPData>({ ip: '获取中...', location: '获取中...' });
   const [proxyIP, setProxyIP] = useState<IPData>({ ip: '获取中...', location: '获取中...' });
+  const [currentIPError, setCurrentIPError] = useState<string | null>(null);
+  const [proxyIPError, setProxyIPError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
     const fetchIPInfo = async () => {
-      try {
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setCurrentIPError(null);
+      setProxyIPError(null);
 
-        // 获取本地IP
-        const localIP = await getLocalIP();
-        
-        // 获取本地IP的位置信息
-        const currentLocationResponse = await fetch(`https://ipapi.co/${localIP}/json/`, {
-          headers: { 'Accept': 'application/json' }
-        });
-        
-        if (!currentLocationResponse.ok) {
-          throw new Error('获取位置信息失败');
-        }
-        
-        const currentLocationData = await currentLocationResponse.json();
-
-        if (mounted) {
-          setCurrentIP({
-            ip: localIP,
-            location: currentLocationData.country_name && currentLocationData.city 
-              ? `${currentLocationData.city}, ${currentLocationData.country_name}`
-              : '未知位置'
+      // 获取当前IP
+      const fetchCurrentIP = async () => {
+        try {
+          const localIP = await getLocalIP();
+          
+          // 获取本地IP的位置信息
+          const currentLocationResponse = await fetch(`https://ipapi.co/${localIP}/json/`, {
+            headers: { 'Accept': 'application/json' }
           });
-        }
+          
+          if (!currentLocationResponse.ok) {
+            throw new Error('获取位置信息失败');
+          }
+          
+          const currentLocationData = await currentLocationResponse.json();
 
-        // 获取代理IP
-        const proxyResponse = await fetch('https://api.ipify.org?format=json', {
-          headers: { 'Accept': 'application/json' }
-        });
-        
-        if (!proxyResponse.ok) {
-          throw new Error('获取代理IP失败');
+          if (mounted) {
+            setCurrentIP({
+              ip: localIP,
+              location: currentLocationData.country_name && currentLocationData.city 
+                ? `${currentLocationData.city}, ${currentLocationData.country_name}`
+                : '未知位置'
+            });
+          }
+        } catch (error) {
+          if (mounted) {
+            console.error('Failed to fetch current IP:', error);
+            setCurrentIPError(error instanceof Error ? error.message : '获取当前IP失败');
+            setCurrentIP({ ip: '未获取到', location: '未获取到' });
+          }
         }
-        
-        const proxyData = await proxyResponse.json();
-        
-        if (!proxyData.ip) {
-          throw new Error('无法获取代理IP');
-        }
+      };
 
-        // 获取代理IP的位置信息
-        const proxyLocationResponse = await fetch(`https://ipapi.co/${proxyData.ip}/json/`, {
-          headers: { 'Accept': 'application/json' }
-        });
-        
-        if (!proxyLocationResponse.ok) {
-          throw new Error('获取代理位置信息失败');
-        }
-        
-        const proxyLocationData = await proxyLocationResponse.json();
-
-        if (mounted) {
-          setProxyIP({
-            ip: proxyData.ip,
-            location: proxyLocationData.country_name && proxyLocationData.city 
-              ? `${proxyLocationData.city}, ${proxyLocationData.country_name}`
-              : '未知位置'
+      // 获取代理IP
+      const fetchProxyIP = async () => {
+        try {
+          const proxyResponse = await fetch('https://api.ipify.org?format=json', {
+            headers: { 'Accept': 'application/json' }
           });
-        }
+          
+          if (!proxyResponse.ok) {
+            throw new Error('获取代理IP失败');
+          }
+          
+          const proxyData = await proxyResponse.json();
+          
+          if (!proxyData.ip) {
+            throw new Error('无法获取代理IP');
+          }
 
-      } catch (error) {
-        if (mounted) {
-          console.error('Failed to fetch IP info:', error);
-          setError(error instanceof Error ? error.message : '获取IP信息失败，请稍后重试');
+          // 获取代理IP的位置信息
+          const proxyLocationResponse = await fetch(`https://ipapi.co/${proxyData.ip}/json/`, {
+            headers: { 'Accept': 'application/json' }
+          });
+          
+          if (!proxyLocationResponse.ok) {
+            throw new Error('获取代理位置信息失败');
+          }
+          
+          const proxyLocationData = await proxyLocationResponse.json();
+
+          if (mounted) {
+            setProxyIP({
+              ip: proxyData.ip,
+              location: proxyLocationData.country_name && proxyLocationData.city 
+                ? `${proxyLocationData.city}, ${proxyLocationData.country_name}`
+                : '未知位置'
+            });
+          }
+        } catch (error) {
+          if (mounted) {
+            console.error('Failed to fetch proxy IP:', error);
+            setProxyIPError(error instanceof Error ? error.message : '获取代理IP失败');
+            setProxyIP({ ip: '未获取到', location: '未获取到' });
+          }
         }
-      } finally {
-        if (mounted) {
-      setLoading(false);
-        }
+      };
+
+      // 并行获取两个IP信息
+      await Promise.all([fetchCurrentIP(), fetchProxyIP()]);
+      
+      if (mounted) {
+        setLoading(false);
       }
     };
 
@@ -160,7 +177,6 @@ export default function IPInfo() {
 
   const handleRetry = () => {
     setLoading(true);
-    setError(null);
     // 重新触发 useEffect
     setCurrentIP({ ip: '获取中...', location: '获取中...' });
     setProxyIP({ ip: '获取中...', location: '获取中...' });
@@ -175,7 +191,7 @@ export default function IPInfo() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
           <p className="text-sm">获取IP信息...</p>
         </div>
-      ) : error ? (
+      ) : (currentIPError && proxyIPError) ? (
         <>
           <div className="flex justify-between items-start relative z-10">
             <div>
@@ -189,7 +205,7 @@ export default function IPInfo() {
           </div>
           
         <div className="mt-2 relative z-10">
-          <p className="text-sm text-muted-foreground break-words overflow-hidden line-clamp-3">{error}</p>
+          <p className="text-sm text-muted-foreground break-words overflow-hidden line-clamp-3">获取IP信息失败，请稍后重试</p>
           <button 
               onClick={handleRetry}
             className="mt-2 text-xs text-primary hover:underline focus:outline-none"
@@ -212,13 +228,25 @@ export default function IPInfo() {
             <div className="space-y-2">
               <div>
                 <p className="text-xs text-muted-foreground">当前IP</p>
-                <p className="text-sm font-medium">{currentIP.ip}</p>
-                <p className="text-xs text-muted-foreground">{currentIP.location}</p>
+                {currentIPError ? (
+                  <p className="text-sm text-destructive">未查询到当前IP信息</p>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium">{currentIP.ip}</p>
+                    <p className="text-xs text-muted-foreground">{currentIP.location}</p>
+                  </>
+                )}
         </div>
         <div>
                 <p className="text-xs text-muted-foreground">代理IP</p>
-                <p className="text-sm font-medium">{proxyIP.ip}</p>
-                <p className="text-xs text-muted-foreground">{proxyIP.location}</p>
+                {proxyIPError ? (
+                  <p className="text-sm text-destructive">未查询到代理IP信息</p>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium">{proxyIP.ip}</p>
+                    <p className="text-xs text-muted-foreground">{proxyIP.location}</p>
+                  </>
+                )}
             </div>
             </div>
           </div>
