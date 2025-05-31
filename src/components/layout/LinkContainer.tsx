@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { LinkCard } from "@/components/ui/LinkCard";
+import LinkCard from "@/components/ui/LinkCard";
 import * as Icons from "lucide-react";
 import { Link, Category } from '@/types/notion';
 

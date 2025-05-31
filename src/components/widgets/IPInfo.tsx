@@ -26,7 +26,14 @@ const getLocalIP = () => {
     }
 
     const pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun.cloudflare.com:3478' },
+        { urls: 'stun:stun.nextcloud.com:443' },
+        { urls: 'stun:stun.sipgate.net:3478' }
+      ]
     });
 
     pc.createDataChannel('');
@@ -38,6 +45,8 @@ const getLocalIP = () => {
       });
 
     let foundIP = false;
+    let fallbackIP: string | null = null;
+    
     pc.onicecandidate = (ice) => {
       if (!ice || !ice.candidate || !ice.candidate.candidate) {
         return;
@@ -54,12 +63,18 @@ const getLocalIP = () => {
             return num >= 0 && num <= 255;
           });
 
-        if (isValidIP && !ip.startsWith('192.168.') && !ip.startsWith('10.') && !ip.startsWith('172.')) {
-          foundIP = true;
-          pc.onicecandidate = null;
-          pc.close();
-          resolve(ip);
-}
+        if (isValidIP) {
+          // 优先使用公网IP（本机真实IP，不受VPN影响）
+          if (!ip.startsWith('192.168.') && !ip.startsWith('10.') && !ip.startsWith('172.')) {
+            foundIP = true;
+            pc.onicecandidate = null;
+            pc.close();
+            resolve(ip);
+          } else if (!fallbackIP) {
+            // 保存内网IP作为备选
+            fallbackIP = ip;
+          }
+        }
       }
     };
 
@@ -67,9 +82,14 @@ const getLocalIP = () => {
       if (!foundIP) {
         pc.onicecandidate = null;
         pc.close();
-        reject(new Error('获取本地IP超时'));
+        if (fallbackIP) {
+          // 如果没有找到公网IP，使用内网IP
+          resolve(fallbackIP);
+        } else {
+          reject(new Error('获取本地IP超时'));
+        }
       }
-    }, 5000);
+    }, 8000); // 增加超时时间到8秒
   });
 };
 
