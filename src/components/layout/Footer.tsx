@@ -3,7 +3,7 @@
 import { WebsiteConfig } from '@/types/notion'
 import { FaGithub, FaXTwitter, FaWeibo } from 'react-icons/fa6'
 import { FaBlogger } from 'react-icons/fa'
-import Image from 'next/image'
+import { cn } from '@/lib/utils'
 
 interface FooterProps {
   config: WebsiteConfig
@@ -57,12 +57,14 @@ export default function Footer({ config, className = "" }: FooterProps) {
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 title="即刻"
               >
-                <Image
+                <img
                   src="/logo_jike.png"
                   alt="即刻"
                   width={20}
                   height={20}
-                  className="filter-muted hover:filter-none transition-all"
+                  className={cn(
+                    "filter-muted hover:filter-none transition-all"
+                  )}
                 />
               </a>
             )}

@@ -57,6 +57,8 @@ const airQualityStyles: Record<AqiCategory, string> = {
 };
 
 export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
+  // 1. 首先声明所有的状态 Hooks
+  const [mounted, setMounted] = useState(false);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,21 +66,21 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
   const [customCity, setCustomCity] = useState('');
   const [currentCity, setCurrentCity] = useState(defaultCity);
   const [savedCity, setSavedCity] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+
+  // 2. 声明所有的 refs
   const cityInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
-  const [hasMounted, setHasMounted] = useState(false);
 
-  // 客户端挂载状态
+  // 3. 声明所有的 effects
   useEffect(() => {
-    setHasMounted(true);
+    setMounted(true);
   }, []);
 
-  // 客户端渲染时设置portal容器并获取保存的城市
   useEffect(() => {
-    if (!hasMounted) return;
+    if (!mounted) return;
     
     setPortalContainer(document.body);
     
@@ -88,35 +90,23 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
       setSavedCity(storedCity);
       setCurrentCity(storedCity);
     }
-  }, [hasMounted]);
+  }, [mounted]);
 
-  // 关键修复：修改点击外部关闭菜单的逻辑
   useEffect(() => {
-    if (!hasMounted) return;
+    if (!mounted) return;
     
-    function handleClickOutside(event: MouseEvent) {
-      // 如果菜单没有显示，不处理
-      if (!showCitySelector) return;
-      
-      // 检查点击是否在菜单外部，且不是在按钮上
-      if (
-        menuRef.current && 
-        !menuRef.current.contains(event.target as Node) &&
-        buttonRef.current && 
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        setShowCitySelector(false);
-      }
-    }
+    fetchWeatherData('auto');
+    
+    // 每30分钟更新一次天气数据
+    const intervalId = setInterval(() => fetchWeatherData('auto'), 30 * 60 * 1000);
+    
+    return () => clearInterval(intervalId);
+  }, [mounted, defaultCity]);
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showCitySelector, hasMounted]);
-
-  // 获取天气数据
+  // 4. 声明所有的处理函数
   const fetchWeatherData = async (city: string) => {
+    if (!mounted) return;
+    
     setLoading(true);
     setError(null);
     
@@ -275,110 +265,29 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
     }
   };
 
-  useEffect(() => {
-    fetchWeatherData('auto');
-    
-    // 每30分钟更新一次天气数据
-    const intervalId = setInterval(() => fetchWeatherData('auto'), 30 * 60 * 1000);
-    
-    return () => clearInterval(intervalId);
-  }, [defaultCity]);
-
-  // 处理城市选择
   const handleCitySelect = () => {
     if (customCity.trim()) {
       fetchWeatherData(customCity.trim());
     }
   };
 
-  // 重新获取位置
   const handleRefreshLocation = () => {
     fetchWeatherData('auto');
   };
 
-  // 切换城市选择器显示状态
   const toggleCitySelector = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowCitySelector(!showCitySelector);
   };
 
-  // 获取空气质量的中文描述
   const getAqiCategoryChineseName = (category?: string) => {
     if (!category) return '良好';
     return aqiCategoryMap[category] || category;
   };
 
-  // 加载状态
-  if (loading && !isRefreshing) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex items-center justify-center"
-      >
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-          <p className="text-sm">获取天气信息...</p>
-        </div>
-      </motion.div>
-    );
-  }
-  
-  // 错误状态
-  if (error) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
-      >
-        {/* 背景装饰 - 主题感知 */}
-        <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
-        
-        <div className="flex justify-between items-start relative z-10">
-          <div>
-            <h3 className="text-xl font-medium text-destructive">获取失败</h3>
-            <p className="text-xs mt-1 text-muted-foreground">{currentCity}</p>
-          </div>
-          <div className="flex items-center space-x-1">
-            <div className="relative">
-              <button 
-                ref={buttonRef}
-                onClick={toggleCitySelector}
-                className="text-xs p-1 rounded-full hover:bg-primary/10 focus:outline-none transition-colors"
-                title="更改位置"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-              </button>
-              {renderCitySelector()}
-            </div>
-            <div className="weather-icon">
-              <span className="text-2xl text-destructive">⚠️</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="mt-2 relative z-10">
-          <p className="text-sm text-muted-foreground break-words overflow-hidden line-clamp-3">{error}</p>
-          <button 
-            onClick={() => fetchWeatherData('auto')} 
-            className="mt-2 text-xs text-primary hover:underline focus:outline-none"
-          >
-            点击重试
-          </button>
-        </div>
-      </motion.div>
-    );
-  }
-
-  // 辅助函数：渲染城市选择器弹窗
-  function renderCitySelector() {
-    if (!hasMounted || !showCitySelector || !portalContainer) return null;
+  // 5. 渲染城市选择器
+  const renderCitySelector = () => {
+    if (!mounted || !showCitySelector || !portalContainer) return null;
 
     // 计算弹窗位置
     const position = buttonRef.current?.getBoundingClientRect() || { left: 0, bottom: 0 };
@@ -474,9 +383,88 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
       </div>,
       portalContainer
     );
+  };
+
+  // 6. 条件渲染
+  if (!mounted) {
+    return (
+      <div className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group animate-fade-in">
+        <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+          <p className="text-sm">加载中...</p>
+        </div>
+      </div>
+    );
   }
-  
-  // 正常显示天气
+
+  if (loading && !isRefreshing) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex items-center justify-center"
+      >
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+          <p className="text-sm">获取天气信息...</p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
+      >
+        {/* 背景装饰 - 主题感知 */}
+        <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
+        
+        <div className="flex justify-between items-start relative z-10">
+          <div>
+            <h3 className="text-xl font-medium text-destructive">获取失败</h3>
+            <p className="text-xs mt-1 text-muted-foreground">{currentCity}</p>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="relative">
+              <button 
+                ref={buttonRef}
+                onClick={toggleCitySelector}
+                className="text-xs p-1 rounded-full hover:bg-primary/10 focus:outline-none transition-colors"
+                title="更改位置"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </button>
+              {renderCitySelector()}
+            </div>
+            <div className="weather-icon">
+              <span className="text-2xl text-destructive">⚠️</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-2 relative z-10">
+          <p className="text-sm text-muted-foreground break-words overflow-hidden line-clamp-3">{error}</p>
+          <button 
+            onClick={() => fetchWeatherData('auto')} 
+            className="mt-2 text-xs text-primary hover:underline focus:outline-none"
+          >
+            点击重试
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // 7. 主渲染
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}

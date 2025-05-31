@@ -105,18 +105,31 @@ export const getLinks = cache(async () => {
                 ],
             });
 
-            const links = response.results.map((page: any) => ({
-                id: page.id,
-                name: page.properties.Name?.title[0]?.plain_text || '未命名',
-                created: page.properties.Created?.created_time || '',
-                desc: page.properties.desc?.rich_text[0]?.plain_text || '',
-                url: page.properties.URL?.url || '#',
-                category1: page.properties.category1?.select?.name || '未分类',
-                category2: page.properties.category2?.select?.name || '默认',
-                iconfile: page.properties.iconfile?.files?.[0]?.file?.url || '',
-                iconlink: page.properties.iconlink?.url || '',
-                tags: page.properties.Tags?.multi_select?.map((tag: any) => tag.name) || [],
-            }));
+            const links = response.results.map((page: any) => {
+                // 处理 iconfile
+                let iconfileUrl = '';
+                if (page.properties.iconfile?.files?.[0]) {
+                    const file = page.properties.iconfile.files[0];
+                    if (file.type === 'external' && file.external) {
+                        iconfileUrl = file.external.url;
+                    } else if (file.type === 'file' && file.file) {
+                        iconfileUrl = file.file.url;
+                    }
+                }
+
+                return {
+                    id: page.id,
+                    name: page.properties.Name?.title[0]?.plain_text || '未命名',
+                    created: page.properties.Created?.created_time || '',
+                    desc: page.properties.desc?.rich_text[0]?.plain_text || '',
+                    url: page.properties.URL?.url || '#',
+                    category1: page.properties.category1?.select?.name || '未分类',
+                    category2: page.properties.category2?.select?.name || '默认',
+                    iconfile: iconfileUrl,
+                    iconlink: page.properties.iconlink?.url || '',
+                    tags: page.properties.Tags?.multi_select?.map((tag: any) => tag.name) || [],
+                };
+            });
 
             allLinks.push(...links);
             hasMore = response.has_more;

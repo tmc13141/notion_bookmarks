@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Link } from '@/types/notion';
 import { motion } from 'framer-motion';
 import { IconExternalLink } from '@tabler/icons-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 
@@ -43,19 +43,26 @@ function getIconUrl(link: Link): string {
   if (link.iconfile) {
     return link.iconfile;
   }
+  
   // 次优先级使用iconlink
   if (link.iconlink) {
     return link.iconlink;
   }
-  // 如果都没有，使用默认图标
-  const url = new URL(link.url);
-  return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=128`;
-}
-
-// 获取备用图标URL的辅助函数
-function getFallbackIconUrl(link: Link): string {
-  const url = new URL(link.url);
-  return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=128`;
+  
+  // 如果都没有，尝试直接从网站获取 favicon
+  try {
+    const url = new URL(link.url);
+    // 尝试多个可能的 favicon 路径
+    const iconServices = [
+      `${url.origin}/favicon.ico`,  // 最常见的 favicon 位置
+      `${url.origin}/favicon.png`,  // 有些网站使用 PNG 格式
+      `https://api.iowen.cn/favicon/${url.hostname}.png`  // 作为备选服务
+    ];
+    return iconServices[0]; // 先尝试直接获取
+  } catch (e) {
+    // 如果 URL 解析失败，使用默认图标
+    return '/globe.svg';
+  }
 }
 
 export default function LinkCard({ link, className }: LinkCardProps) {
@@ -64,13 +71,61 @@ export default function LinkCard({ link, className }: LinkCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageSrc, setImageSrc] = useState(getIconUrl(link));
   const [imageError, setImageError] = useState(false);
+  const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
+  const imgRef = useRef<HTMLImageElement>(null);
 
-  // 当link变化时重置图片状态
+  // 预加载图片
   useEffect(() => {
-    setImageSrc(getIconUrl(link));
+    if (imageSrc && imgRef.current) {
+      const img = new window.Image();
+      img.src = imageSrc;
+      img.onload = () => {
+        if (imgRef.current) {
+          imgRef.current.src = imageSrc;
+          setImageLoaded(true);
+        }
+      };
+      img.onerror = () => {
+        // 如果当前服务失败，尝试下一个服务
+        try {
+          const url = new URL(link.url);
+          const iconServices = [
+            `${url.origin}/favicon.ico`,
+            `${url.origin}/favicon.png`,
+            `https://api.iowen.cn/favicon/${url.hostname}.png`
+          ];
+          
+          if (currentServiceIndex < iconServices.length - 1) {
+            // 尝试下一个服务
+            setCurrentServiceIndex(prev => prev + 1);
+            setImageSrc(iconServices[currentServiceIndex + 1]);
+          } else {
+            // 所有服务都失败，使用默认图标
+            setImageSrc('/globe.svg');
+            setImageError(true);
+            setImageLoaded(true);
+          }
+        } catch (e) {
+          setImageSrc('/globe.svg');
+          setImageError(true);
+          setImageLoaded(true);
+        }
+      };
+    }
+  }, [imageSrc, currentServiceIndex, link.url]);
+
+  // 当 link 属性变化时重置图标状态
+  useEffect(() => {
     setImageError(false);
     setImageLoaded(false);
-  }, [link.id, link.iconfile, link.iconlink]);
+    setCurrentServiceIndex(0);
+    setImageSrc(getIconUrl(link));
+  }, [link]);
+
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoaded(true);
+  };
 
   const handleMouseEnter = (
     event: React.MouseEvent<HTMLElement>,
@@ -115,29 +170,24 @@ export default function LinkCard({ link, className }: LinkCardProps) {
               className="relative w-10 h-10 rounded-xl overflow-hidden transition-all shrink-0
                        bg-muted/50 p-1.5 border border-border/50"
             >
-              <Image
-                src={imageSrc}
-                alt="Site Icon"
-                fill
-                className={cn(
-                  "object-contain transition-opacity duration-300",
-                  imageLoaded ? "opacity-100" : "opacity-0"
+              <div className="icon-container relative w-full h-full">
+                <img
+                  ref={imgRef}
+                  alt="Site Icon"
+                  className={cn(
+                    "w-full h-full object-contain transition-opacity duration-200",
+                    imageLoaded ? "opacity-100" : "opacity-0"
+                  )}
+                  onError={handleImageError}
+                  loading="eager"
+                  decoding="async"
+                />
+                {!imageLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                  </div>
                 )}
-                sizes="40px"
-                onLoad={() => setImageLoaded(true)}
-                onError={() => {
-                  if (!imageError && imageSrc !== getFallbackIconUrl(link)) {
-                    // 第一次加载失败，尝试使用备用图标
-                    setImageError(true);
-                    setImageSrc(getFallbackIconUrl(link));
-                    setImageLoaded(false);
-                  } else {
-                    // 备用图标也失败了，显示当前状态
-                    setImageLoaded(true);
-                  }
-                }}
-                loading="lazy"
-              />
+              </div>
             </motion.div>
             
             {/* 网站名称和图标 */}
