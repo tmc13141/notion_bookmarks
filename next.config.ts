@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
         hostname: '**',  // 允许所有 HTTPS 域名
       },
     ],
+    // 禁用图片优化以避免付费服务
+    unoptimized: true,
   },
   eslint: {
     ignoreDuringBuilds: true,

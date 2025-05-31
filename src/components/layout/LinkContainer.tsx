@@ -1,24 +1,29 @@
 // src/components/LinkContainer.tsx
 "use client";
 
-import React from "react";
-import LinkCard from "@/components/ui/LinkCard";
+import React, { useState, useEffect } from "react";
+import { LinkCard } from "@/components/ui/LinkCard";
 import * as Icons from "lucide-react";
-import type { Link, Category } from '@/types/notion'; 
+import { Link, Category } from '@/types/notion';
 
 interface LinkContainerProps {
   initialLinks: Link[];
   enabledCategories: Set<string>;
   categories: Category[];
-  lastGeneratedTime?: Date;
 }
 
 export default function LinkContainer({
   initialLinks,
   enabledCategories,
   categories,
-  lastGeneratedTime = new Date(),
 }: LinkContainerProps) {
+  const [mounted, setMounted] = useState(false);
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    setCurrentTime(new Date());
+  }, []);
   // 按一级和二级分类组织链接，只包含启用的分类
   const linksByCategory = initialLinks.reduce((acc, link) => {
     const cat1 = link.category1;
@@ -99,9 +104,11 @@ export default function LinkContainer({
           </section>
         );
       })}
-      <div className="mt-12 text-center text-sm text-muted-foreground">
-        最近更新：{formatDate(lastGeneratedTime)}
-      </div>
+      {mounted && currentTime && (
+        <div className="mt-12 text-center text-sm text-muted-foreground">
+          最近更新：{formatDate(currentTime)}
+        </div>
+      )}
     </div>
   );
 }

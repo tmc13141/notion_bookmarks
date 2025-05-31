@@ -5,9 +5,9 @@ import { motion } from 'framer-motion';
 import Lunar from 'lunar-javascript';
 
 export default function SimpleTime() {
-  // 使用固定的初始时间，避免服务端和客户端渲染不一致
+  // 使用 null 初始状态，避免服务端和客户端渲染不一致
   const [mounted, setMounted] = useState(false);
-  const [time, setTime] = useState(new Date('2023-01-01T00:00:00'));
+  const [time, setTime] = useState<Date | null>(null);
   const [lunarDate, setLunarDate] = useState('');
   
   // 使用 ref 存储当前日期，避免无限循环
@@ -67,20 +67,20 @@ export default function SimpleTime() {
     return () => clearInterval(timer);
   }, []); // 依赖数组为空，只在组件挂载时执行一次
 
-  // 日期格式化
-  const year = time.getFullYear();
-  const month = time.getMonth() + 1;
-  const day = time.getDate();
-  const hours = time.getHours().toString().padStart(2, '0');
-  const minutes = time.getMinutes().toString().padStart(2, '0');
-  const seconds = time.getSeconds().toString().padStart(2, '0');
+  // 日期格式化 - 只有在 time 存在时才进行
+  const year = time?.getFullYear() || 0;
+  const month = (time?.getMonth() || 0) + 1;
+  const day = time?.getDate() || 0;
+  const hours = (time?.getHours() || 0).toString().padStart(2, '0');
+  const minutes = (time?.getMinutes() || 0).toString().padStart(2, '0');
+  const seconds = (time?.getSeconds() || 0).toString().padStart(2, '0');
   
   // 获取星期几
   const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
-  const weekDay = weekDays[time.getDay()];
+  const weekDay = weekDays[time?.getDay() || 0];
 
-  // 如果未挂载，返回加载状态
-  if (!mounted) {
+  // 如果未挂载或时间未初始化，返回加载状态
+  if (!mounted || !time) {
     return (
       <div className="flex flex-row items-center justify-center">
         <div className="widget-card simple-time-widget p-4 rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm shadow-sm w-[280px] h-[150px] flex items-center">
