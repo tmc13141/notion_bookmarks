@@ -39,13 +39,13 @@ function Tooltip({ content, show, x, y }: { content: string; show: boolean; x: n
 
 // 获取图标URL的辅助函数
 function getIconUrl(link: Link): string {
-  // 优先使用iconlink
-  if (link.iconlink) {
-    return link.iconlink;
-  }
-  // 其次使用iconfile
+  // 最优先使用iconfile
   if (link.iconfile) {
     return link.iconfile;
+  }
+  // 次优先级使用iconlink
+  if (link.iconlink) {
+    return link.iconlink;
   }
   // 如果都没有，使用默认图标
   const url = new URL(link.url);
