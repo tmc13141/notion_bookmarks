@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Link } from '@/types/notion';
 import { motion } from 'framer-motion';
 import { IconExternalLink } from '@tabler/icons-react';
@@ -49,20 +48,8 @@ function getIconUrl(link: Link): string {
     return link.iconlink;
   }
   
-  // 如果都没有，尝试直接从网站获取 favicon
-  try {
-    const url = new URL(link.url);
-    // 尝试多个可能的 favicon 路径
-    const iconServices = [
-      `${url.origin}/favicon.ico`,  // 最常见的 favicon 位置
-      `${url.origin}/favicon.png`,  // 有些网站使用 PNG 格式
-      `https://api.iowen.cn/favicon/${url.hostname}.png`  // 作为备选服务
-    ];
-    return iconServices[0]; // 先尝试直接获取
-  } catch (e) {
-    // 如果 URL 解析失败，使用默认图标
-    return '/globe.svg';
-  }
+  // 如果都没有，直接使用默认图标
+  return '/globe.svg';
 }
 
 export default function LinkCard({ link, className }: LinkCardProps) {
@@ -71,7 +58,6 @@ export default function LinkCard({ link, className }: LinkCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageSrc, setImageSrc] = useState(getIconUrl(link));
   const [imageError, setImageError] = useState(false);
-  const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
   const imgRef = useRef<HTMLImageElement>(null);
 
   // 预加载图片
@@ -86,39 +72,18 @@ export default function LinkCard({ link, className }: LinkCardProps) {
         }
       };
       img.onerror = () => {
-        // 如果当前服务失败，尝试下一个服务
-        try {
-          const url = new URL(link.url);
-          const iconServices = [
-            `${url.origin}/favicon.ico`,
-            `${url.origin}/favicon.png`,
-            `https://api.iowen.cn/favicon/${url.hostname}.png`
-          ];
-          
-          if (currentServiceIndex < iconServices.length - 1) {
-            // 尝试下一个服务
-            setCurrentServiceIndex(prev => prev + 1);
-            setImageSrc(iconServices[currentServiceIndex + 1]);
-          } else {
-            // 所有服务都失败，使用默认图标
-            setImageSrc('/globe.svg');
-            setImageError(true);
-            setImageLoaded(true);
-          }
-        } catch (e) {
-          setImageSrc('/globe.svg');
-          setImageError(true);
-          setImageLoaded(true);
-        }
+        // 如果图片加载失败，使用默认图标
+        setImageSrc('/globe.svg');
+        setImageError(true);
+        setImageLoaded(true);
       };
     }
-  }, [imageSrc, currentServiceIndex, link.url]);
+  }, [imageSrc]);
 
   // 当 link 属性变化时重置图标状态
   useEffect(() => {
     setImageError(false);
     setImageLoaded(false);
-    setCurrentServiceIndex(0);
     setImageSrc(getIconUrl(link));
   }, [link]);
 
