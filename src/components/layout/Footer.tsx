@@ -79,6 +79,25 @@ export default function Footer({ config, className = "" }: FooterProps) {
                 <FaWeibo className="w-5 h-5" />
               </a>
             )}
+            {config.SOCIAL_XIAOHONGSHU && (
+              <a
+                href={config.SOCIAL_XIAOHONGSHU}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                title="小红书"
+              >
+                <img
+                  src="/xhs_logo.svg"
+                  alt="小红书"
+                  width={20}
+                  height={20}
+                  className={cn(
+                    "filter-muted hover:filter-none transition-all"
+                  )}
+                />
+              </a>
+            )}
           </div>
           <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4">
             <p className="hidden md:block text-sm text-muted-foreground">

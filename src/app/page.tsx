@@ -2,7 +2,6 @@
 import LinkContainer from '@/components/layout/LinkContainer';
 import Navigation from '@/components/layout/Navigation';
 import { getLinks, getCategories, getWebsiteConfig } from '@/lib/notion';
-import AnimatedMain from '@/components/layout/AnimatedMain';
 import Footer from '@/components/layout/Footer';
 import { SimpleTime, AnalogClock, Weather, IPInfo, HotNews } from '@/components/widgets';
 import WidgetsContainer from '@/components/layout/WidgetsContainer';

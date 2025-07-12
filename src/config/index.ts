@@ -10,7 +10,8 @@ export const defaultConfig = {
     SOCIAL_BLOG: '',
     SOCIAL_X: '',
     SOCIAL_JIKE: '',
-    SOCIAL_WEIBO: ''
+    SOCIAL_WEIBO: '',
+    SOCIAL_XIAOHONGSHU: ''
 } as const;
 
 // 环境变量配置

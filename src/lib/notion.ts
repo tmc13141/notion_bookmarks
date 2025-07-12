@@ -52,34 +52,7 @@ export const notion = new Client({
     auth: envConfig.NOTION_TOKEN
 });
 
-// 添加获取图标URL的辅助函数
-const getIconUrl = (page: any): string => {
-    // 优先使用自定义图标链接
-    if (page.properties.iconlink?.url) {
-        return page.properties.iconlink.url;
-    }
-    
-    // 其次使用上图标文件
-    if (page.properties.iconfile?.files?.[0]) {
-        const file = page.properties.iconfile.files[0];
-        return file.type === 'external' ? file.external.url : file.file.url;
-    }
-    
-    // 最后使用页面图标
-    if (page.icon) {
-        if (page.icon.type === 'emoji') {
-            return page.icon.emoji;
-        }
-        if (page.icon.type === 'file') {
-            return page.icon.file.url;
-        }
-        if (page.icon.type === 'external') {
-            return page.icon.external.url;
-        }
-    }
-    
-    return ''; // 如果没有图标则返回空字符串
-};
+
 
 // 获取网址链接
 export const getLinks = cache(async () => {
@@ -105,31 +78,24 @@ export const getLinks = cache(async () => {
                 ],
             });
 
-            const links = response.results.map((page: any) => {
-                // 处理 iconfile
-                let iconfileUrl = '';
-                if (page.properties.iconfile?.files?.[0]) {
-                    const file = page.properties.iconfile.files[0];
-                    if (file.type === 'external' && file.external) {
-                        iconfileUrl = file.external.url;
-                    } else if (file.type === 'file' && file.file) {
-                        iconfileUrl = file.file.url;
-                    }
-                }
-
-                return {
-                    id: page.id,
-                    name: page.properties.Name?.title[0]?.plain_text || '未命名',
-                    created: page.properties.Created?.created_time || '',
-                    desc: page.properties.desc?.rich_text[0]?.plain_text || '',
-                    url: page.properties.URL?.url || '#',
-                    category1: page.properties.category1?.select?.name || '未分类',
-                    category2: page.properties.category2?.select?.name || '默认',
-                    iconfile: iconfileUrl,
-                    iconlink: page.properties.iconlink?.url || '',
-                    tags: page.properties.Tags?.multi_select?.map((tag: any) => tag.name) || [],
-                };
-            });
+            const links = response.results
+                .filter((page): page is PageObjectResponse => 'properties' in page)
+                .map((page) => {
+                    const pageProps = page.properties as Record<string, unknown>;
+                    
+                    return {
+                        id: page.id,
+                        name: getTitleText(pageProps.Name as TitlePropertyItemObjectResponse),
+                        created: (pageProps.Created as { created_time?: string })?.created_time || '',
+                        desc: getRichText(pageProps.desc as RichTextPropertyItemObjectResponse),
+                        url: (pageProps.URL as { url?: string })?.url || '#',
+                        category1: (pageProps.category1 as { select?: { name?: string } })?.select?.name || '未分类',
+                        category2: (pageProps.category2 as { select?: { name?: string } })?.select?.name || '默认',
+                        iconfile: getFileUrl(pageProps.iconfile as FilesPropertyItemObjectResponse),
+                        iconlink: (pageProps.iconlink as { url?: string })?.url || '',
+                        tags: (pageProps.Tags as { multi_select?: { name: string }[] })?.multi_select?.map((tag) => tag.name) || [],
+                    };
+                });
 
             allLinks.push(...links);
             hasMore = response.has_more;
@@ -183,16 +149,16 @@ export const getWebsiteConfig = cache(async () => {
         // 获取配置数据库页面的图标作为网站图标
         const database = await notion.databases.retrieve({
             database_id: envConfig.NOTION_WEBSITE_CONFIG_ID!
-        }) as any;
+        }) as { icon?: { type: string; emoji?: string; file?: { url: string }; external?: { url: string } } };
         let favicon = '/favicon.ico';
 
         if (database.icon) {
             if (database.icon.type === 'emoji') {
                 // 如果是 emoji，生成 data URL
                 favicon = `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${database.icon.emoji}</text></svg>`;
-            } else if (database.icon.type === 'file') {
+            } else if (database.icon.type === 'file' && database.icon.file) {
                 favicon = database.icon.file.url;
-            } else if (database.icon.type === 'external') {
+            } else if (database.icon.type === 'external' && database.icon.external) {
                 favicon = database.icon.external.url;
             }
         }
@@ -217,6 +183,7 @@ export const getWebsiteConfig = cache(async () => {
             SOCIAL_X: configMap.SOCIAL_X ?? '',
             SOCIAL_JIKE: configMap.SOCIAL_JIKE ?? '',
             SOCIAL_WEIBO: configMap.SOCIAL_WEIBO ?? '',
+            SOCIAL_XIAOHONGSHU: configMap.SOCIAL_XIAOHONGSHU ?? '',
             // 分析和统计
             CLARITY_ID: configMap.CLARITY_ID ?? '',
             GA_ID: configMap.GA_ID ?? '',
@@ -255,16 +222,22 @@ export const getCategories = cache(async () => {
       ],
     });
 
-    const categories = response.results.map((page: any) => ({
-      id: page.id,
-      name: getTitleText(page.properties.Name),
-      iconName: getRichText(page.properties.IconName),
-      order: page.properties.Order?.number || 0,
-      enabled: page.properties.Enabled?.checkbox || false,
-    }));
+    const categories = response.results
+      .filter((page): page is PageObjectResponse => 'properties' in page)
+      .map((page) => {
+        const pageProps = page.properties as Record<string, unknown>;
+        return {
+          id: page.id,
+          name: getTitleText(pageProps.Name as TitlePropertyItemObjectResponse),
+          iconName: getRichText(pageProps.IconName as RichTextPropertyItemObjectResponse),
+          order: (pageProps.Order as { number?: number })?.number || 0,
+          enabled: (pageProps.Enabled as { checkbox?: boolean })?.checkbox || false,
+        };
+      });
 
     return categories.sort((a, b) => a.order - b.order);
-  } catch (error) {
+  } catch (err) {
+    console.error('获取分类失败:', err);
     return [];
   }
 });
