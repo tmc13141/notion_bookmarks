@@ -49,3 +49,6 @@ yarn-error.log*
 
 # TypeScript
 *.tsbuildinfo
+
+# Trae AI IDE files
+.trae/

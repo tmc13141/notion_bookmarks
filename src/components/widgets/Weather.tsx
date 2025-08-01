@@ -33,16 +33,16 @@ interface WeatherProps {
   defaultCity?: string;
 }
 
-// 空气质量级别对应的中文名称
-const aqiCategoryMap: Record<string, string> = {
-  'Good': '优',
-  'Moderate': '良',
-  'Unhealthy for Sensitive Groups': '轻度污染',
-  'Unhealthy': '中度污染',
-  'Very Unhealthy': '重度污染',
-  'Hazardous': '严重污染',
-  'Excellent': '优'
-};
+// 空气质量级别对应的中文名称 - 直接在AqiCategory类型中定义，不需要映射
+// const aqiCategoryMap: Record<string, string> = {
+//   'Good': '优',
+//   'Moderate': '良',
+//   'Unhealthy for Sensitive Groups': '轻度污染',
+//   'Unhealthy': '中度污染',
+//   'Very Unhealthy': '重度污染',
+//   'Hazardous': '严重污染',
+//   'Excellent': '优'
+// };
 
 // 添加空气质量类型定义
 type AqiCategory = '优' | '良' | '轻度污染' | '中度污染' | '重度污染' | '严重污染';
@@ -68,6 +68,8 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
   const [savedCity, setSavedCity] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  
+  // 添加suppressHydrationWarning属性到组件根元素
 
   // 2. 声明所有的 refs
   const cityInputRef = useRef<HTMLInputElement>(null);
@@ -81,30 +83,66 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
 
   useEffect(() => {
     if (!mounted) return;
-    
-    setPortalContainer(document.body);
-    
-    // 从localStorage获取保存的城市
-    const storedCity = localStorage.getItem('weatherCity');
-    if (storedCity) {
-      setSavedCity(storedCity);
-      setCurrentCity(storedCity);
-    }
-  }, [mounted]);
 
-  useEffect(() => {
-    if (!mounted) return;
-    
-    fetchWeatherData('auto');
-    
-    // 每30分钟更新一次天气数据
-    const intervalId = setInterval(() => fetchWeatherData('auto'), 30 * 60 * 1000);
-    
+    // 1. Set up portal container
+    setPortalContainer(document.body);
+
+    // 2. Determine city and fetch data (确保只在客户端执行localStorage)
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const cityFromStorage = localStorage.getItem('weatherCity');
+      if (cityFromStorage) {
+        setSavedCity(cityFromStorage);
+        setCurrentCity(cityFromStorage);
+        fetchWeatherData(cityFromStorage); // Use stored city
+      } else {
+        fetchWeatherData('auto'); // Geolocate
+      }
+    } else {
+      // 服务器端渲染时使用默认城市
+      fetchWeatherData('auto');
+    }
+
+    // 3. Set up interval for updates
+    const intervalId = setInterval(() => {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        const latestCity = localStorage.getItem('weatherCity');
+        if (latestCity) {
+          fetchWeatherData(latestCity);
+        } else {
+          fetchWeatherData('auto');
+        }
+      } else {
+        fetchWeatherData('auto');
+      }
+    }, 30 * 60 * 1000);
+
     return () => clearInterval(intervalId);
   }, [mounted, defaultCity]);
 
+  // 添加点击外部关闭弹窗的功能
+  useEffect(() => {
+    if (!mounted || !showCitySelector) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setShowCitySelector(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mounted, showCitySelector]);
+
   // 4. 声明所有的处理函数
-  const fetchWeatherData = async (city: string) => {
+  const fetchWeatherData = async (city: string, saveToStorage = false) => {
     if (!mounted) return;
     
     setLoading(true);
@@ -118,74 +156,64 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
     try {
       // 尝试获取用户位置
       let location = city;
-      let locationSource = '自定义城市';
+      // locationSource变量在此代码中不再使用，移除以避免警告
       let latitude: number | null = null;
       let longitude: number | null = null;
-      
+
       if (city === 'auto') {
-        // 优先使用保存的城市
-        if (savedCity) {
-          location = savedCity;
-          locationSource = '记忆城市';
-        } else {
-          location = defaultCity;
-          locationSource = '默认城市';
-          
-          try {
-            // 先尝试使用浏览器定位
-            if (typeof navigator !== 'undefined' && navigator.geolocation) {
-              const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(resolve, reject, {
-                  timeout: 10000,
-                  maximumAge: 600000 // 10分钟缓存
-                });
+        location = defaultCity;
+        try {
+          // 确保只在客户端执行浏览器API
+          if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.geolocation) {
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                timeout: 10000,
+                maximumAge: 600000, // 10分钟缓存
               });
-              
-              // 使用经纬度获取城市信息
-              latitude = position.coords.latitude;
-              longitude = position.coords.longitude;
-              const geoResponse = await fetch(`/api/weather/geo?lat=${latitude}&lon=${longitude}`);
-              
-              if (!geoResponse.ok) throw new Error('无法获取位置信息');
-              
-              const geoData = await geoResponse.json();
-              if (geoData.location && geoData.location !== '未知位置') {
-                location = geoData.location;
-                locationSource = '位置服务';
-              }
+            });
+
+            // 使用经纬度获取城市信息
+            latitude = position.coords.latitude;
+            longitude = position.coords.longitude;
+            const geoResponse = await fetch(`/api/weather/geo?lat=${latitude}&lon=${longitude}`);
+
+            if (!geoResponse.ok) throw new Error('无法获取位置信息');
+
+            const geoData = await geoResponse.json();
+            if (geoData.location && geoData.location !== '未知位置') {
+              location = geoData.location;
             }
-            
-            // 如果浏览器定位失败，尝试使用 IP 定位
-            if (location === defaultCity) {
-              const ipResponse = await fetch('/api/weather/ip');
-              
-              if (ipResponse.ok) {
-                const ipData = await ipResponse.json();
-                
-                if (ipData.location && ipData.location !== '未知位置') {
-                  location = ipData.location;
-                  locationSource = 'IP定位';
-                  // 如果IP定位返回了经纬度，保存下来
-                  if (ipData.latitude && ipData.longitude) {
-                    latitude = ipData.latitude;
-                    longitude = ipData.longitude;
-                  }
+          }
+
+          // 如果浏览器定位失败，尝试使用 IP 定位
+          if (location === defaultCity) {
+            const ipResponse = await fetch('/api/weather/ip');
+
+            if (ipResponse.ok) {
+              const ipData = await ipResponse.json();
+
+              if (ipData.location && ipData.location !== '未知位置') {
+                location = ipData.location;
+                // 如果IP定位返回了经纬度，保存下来
+                if (ipData.latitude && ipData.longitude) {
+                  latitude = ipData.latitude;
+                  longitude = ipData.longitude;
                 }
               }
             }
-          } catch (error) {
-            console.error('位置获取失败:', error);
-            // 使用默认城市
-            location = defaultCity;
-            locationSource = '默认城市';
           }
+        } catch (error) {
+          console.error('位置获取失败:', error);
+          // 使用默认城市
+          location = defaultCity;
         }
-      } else {
-        // 如果是手动选择的城市，保存到localStorage
-        if (city !== 'auto' && city !== defaultCity && typeof localStorage !== 'undefined') {
-          localStorage.setItem('weatherCity', city);
-          setSavedCity(city);
-        }
+      }
+
+      // 如果是手动选择的城市，保存到localStorage（确保只在客户端执行）
+      if (saveToStorage && city !== 'auto' && typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem('weatherCity', city);
+        setSavedCity(city);
+        location = city;
       }
       
       setCurrentCity(location);
@@ -222,10 +250,10 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
       // 如果有经纬度，尝试获取空气质量数据
       if (location) {
         try {
-          // 如果有经纬度，优先使用经纬度，否则使用城市名
-          let airUrl = latitude && longitude
-            ? `/api/weather/air?lat=${latitude}&lon=${longitude}&city=${encodeURIComponent(location)}`
-            : `/api/weather/air?city=${encodeURIComponent(location)}`;
+          // 如果有经纬度，优先使用经纬度，否则只使用城市名
+          const airUrl = latitude && longitude
+            ? `/api/weather/air?lat=${latitude}&lon=${longitude}`
+            : `/api/weather/air?location=${encodeURIComponent(location)}`;
           
           const airResponse = await fetch(airUrl);
           
@@ -243,8 +271,9 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
             }
             // 空气质量数据获取失败时静默处理，不在客户端显示错误
           }
-        } catch (airError) {
+        } catch (error) {
           // 空气质量获取失败不影响天气显示，静默处理
+          console.debug('空气质量数据获取失败:', error);
         }
       }
       
@@ -267,7 +296,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
 
   const handleCitySelect = () => {
     if (customCity.trim()) {
-      fetchWeatherData(customCity.trim());
+      fetchWeatherData(customCity.trim(), true);
     }
   };
 
@@ -280,14 +309,18 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
     setShowCitySelector(!showCitySelector);
   };
 
-  const getAqiCategoryChineseName = (category?: string) => {
-    if (!category) return '良好';
-    return aqiCategoryMap[category] || category;
-  };
+  // 移除未使用的函数
+  // const getAqiCategoryChineseName = (category?: string) => {
+  //   if (!category) return '良好';
+  //   return aqiCategoryMap[category] || category;
+  // };
 
   // 5. 渲染城市选择器
   const renderCitySelector = () => {
     if (!mounted || !showCitySelector || !portalContainer) return null;
+
+    // 确保只在客户端渲染
+    if (typeof window === 'undefined') return null;
 
     // 计算弹窗位置
     const position = buttonRef.current?.getBoundingClientRect() || { left: 0, bottom: 0 };
@@ -299,10 +332,23 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
         style={{
           left: position.left,
           top: position.bottom + 5,
+          position: 'absolute', // 改为绝对定位，这样会随页面滚动
         }}
         onClick={(e) => e.stopPropagation()}
+        suppressHydrationWarning
       >
-        <div className="flex flex-col space-y-2">
+        {/* 添加关闭按钮 */}
+        <button 
+          onClick={() => setShowCitySelector(false)}
+          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground focus:outline-none transition-colors"
+          aria-label="关闭"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div className="flex flex-col space-y-2 mt-2 pr-4">
           <button 
             onClick={handleRefreshLocation}
             className="text-xs text-left px-2 py-1.5 hover:bg-primary/10 rounded-sm flex items-center gap-2 transition-colors"
@@ -358,7 +404,9 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
                 value={customCity}
                 onChange={(e) => setCustomCity(e.target.value)}
                 placeholder="输入城市名称"
-                className="w-24 text-xs p-1 border border-border/40 rounded bg-background/80 focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-24 text-xs p-1 border border-border/40 rounded bg-background/80 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                style={{ color: 'var(--foreground)' }} /* 使用CSS变量确保在所有主题下文字颜色正确 */
+                suppressHydrationWarning /* 抑制水合错误警告 */
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -372,7 +420,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
                   e.stopPropagation();
                   handleCitySelect();
                 }}
-                className="ml-1 px-4 h-7 text-xs font-medium bg-primary text-primary-foreground rounded shadow-sm focus:outline-none transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center"
+                className="ml-1 px-3 h-7 text-xs font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground focus:outline-none transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center whitespace-nowrap"
                 disabled={!customCity.trim()}
               >
                 确定
@@ -388,7 +436,10 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
   // 6. 条件渲染
   if (!mounted) {
     return (
-      <div className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group animate-fade-in">
+      <div 
+        className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group animate-fade-in"
+        suppressHydrationWarning
+      >
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
@@ -405,6 +456,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex items-center justify-center"
+        suppressHydrationWarning
       >
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
@@ -421,6 +473,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
+        suppressHydrationWarning
       >
         {/* 背景装饰 - 主题感知 */}
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
@@ -471,6 +524,7 @@ export default function Weather({ defaultCity = '杭州' }: WeatherProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="widget-card weather-widget p-4 bg-card/80 backdrop-blur-sm text-card-foreground w-[220px] h-[150px] flex flex-col justify-between relative overflow-hidden group"
+      suppressHydrationWarning
     >
       {/* 背景装饰 - 主题感知 */}
       <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none transition-opacity group-hover:opacity-20"></div>
