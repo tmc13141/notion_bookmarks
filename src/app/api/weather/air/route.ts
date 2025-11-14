@@ -4,12 +4,12 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const lat = searchParams.get('lat');
   const lon = searchParams.get('lon');
-  const city = searchParams.get('city'); // 接收城市参数
+  const location = searchParams.get('location'); // 接收城市参数
   
   // 检查是否提供了必要的参数（经纬度或城市名）
-  if ((!lat || !lon) && !city) {
+  if ((!lat || !lon) && !location) {
     return NextResponse.json(
-      { error: '缺少位置参数（需要提供lat和lon，或者city）' },
+      { error: '缺少位置参数（需要提供lat和lon，或者location）' },
       { status: 400 }
     );
   }
@@ -30,13 +30,79 @@ export async function GET(request: Request) {
     
     // 修改：优先使用经纬度，仅当经纬度不完整时才使用城市名
     if (lat && lon) {
-      // 使用正确的路径参数格式
-      apiUrl = `https://devapi.qweather.com/airquality/v1/current/${lat}/${lon}?key=${apiKey}`;
+      // 使用经纬度格式：经度,纬度
+      apiUrl = `https://devapi.qweather.com/v7/air/now?location=${lon},${lat}&key=${apiKey}`;
       locationType = '经纬度';
-    } else if (city) {
-      // 对于城市名，我们仍然使用查询参数格式
-      apiUrl = `https://devapi.qweather.com/v7/air/now?location=${encodeURIComponent(city)}&key=${apiKey}`;
-      locationType = '城市名';
+    } else if (location) {
+      // 对于城市名，我们使用location参数
+      // 首先尝试使用城市搜索API获取城市ID
+      try {
+        // 使用和风天气城市搜索API获取城市ID
+        const geoApiUrl = `https://geoapi.qweather.com/v2/city/lookup?location=${encodeURIComponent(location)}&key=${apiKey}`;
+        console.error(`使用城市名查询: ${location}`);
+        console.error(`开始请求城市查询API...`);
+        
+        const geoResponse = await fetch(geoApiUrl);
+        
+        if (geoResponse.ok) {
+          const geoData = await geoResponse.json();
+          console.error('城市查询响应:', JSON.stringify(geoData).substring(0, 200) + '...');
+          
+          // 检查是否成功获取城市信息
+          if (geoData.code === '200' && geoData.location && geoData.location.length > 0) {
+            // 使用第一个匹配结果的ID
+            const cityId = geoData.location[0].id;
+            const cityName = geoData.location[0].name;
+            
+            console.error(`找到位置: ${cityName}, ID: ${cityId}`);
+            
+            // 使用获取到的城市ID查询空气质量
+            apiUrl = `https://devapi.qweather.com/v7/air/now?location=${cityId}&key=${apiKey}`;
+            locationType = '城市ID(动态查询)';
+            
+            // 继续处理
+          } else {
+            console.error(`城市搜索失败: ${location}, 错误码: ${geoData.code}`);
+            // 城市搜索失败，返回错误信息
+            return NextResponse.json(
+              { error: `找不到城市: ${location}` },
+              { status: 404 }
+            );
+          }
+        } else {
+          console.error(`城市搜索请求失败: ${geoResponse.status}`);
+          // 区分404错误（城市不存在）和其他错误（服务异常）
+          if (geoResponse.status === 404) {
+            return NextResponse.json(
+              { error: `找不到城市: ${location}` },
+              { status: 404 }
+            );
+          } else {
+            // 城市搜索API请求失败，返回错误信息
+            return NextResponse.json(
+              { error: `城市搜索服务异常，请稍后再试` },
+              { status: 503 }
+            );
+          }
+        }
+      } catch (error) {
+        console.error(`城市搜索异常: ${error instanceof Error ? error.message : String(error)}`);
+        // 区分网络错误和其他类型的异常
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+          return NextResponse.json(
+            { error: `网络连接异常，无法访问天气服务` },
+            { status: 503 }
+          );
+        } else {
+          // 其他类型的异常
+          return NextResponse.json(
+            { error: `城市搜索服务异常，请稍后再试` },
+            { status: 500 }
+          );
+        }
+      }
+      
+      // 直接使用城市名称作为参数
     } else {
       // 这种情况应该不会发生，因为前面已经检查过参数
       return NextResponse.json(
@@ -153,10 +219,11 @@ function getPollutantName(code: string) {
     'no2': 'NO₂',
     'so2': 'SO₂',
     'o3': 'O₃',
-    'co': 'CO'
+    'co': 'CO',
+    'NA': 'NA'
   };
   
-  return pollutantMap[code.toLowerCase()] || code;
+  return pollutantMap[code?.toLowerCase()] || code || 'NA';
 }
 
 // 获取污染物全称
@@ -168,8 +235,9 @@ function getPollutantFullName(code: string) {
     'no2': '二氧化氮',
     'so2': '二氧化硫',
     'o3': '臭氧',
-    'co': '一氧化碳'
+    'co': '一氧化碳',
+    'NA': ''
   };
   
-  return pollutantFullNameMap[code.toLowerCase()] || '';
+  return pollutantFullNameMap[code?.toLowerCase()] || '';
 }

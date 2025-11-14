@@ -2,7 +2,7 @@
 
 
 ## 更新说明
-🎉更新内容及更新方法见[保姆级教程](https://ezho.top/code/2025/02/21/notion-bookmarks-handbook)
+🎉更新内容及更新方法见[保姆级教程](https://moyuguy.github.io/docs_notion_bookmarks/guide/getting-started.html)
 
 <details>
   <summary> 2025/5/19</summary>

@@ -8,9 +8,45 @@ interface HotNewsItem {
   platform: string;
 }
 
+interface WeiboItem {
+  note: string;
+  num: number;
+}
+
+interface BaiduItem {
+  title: string;
+  url?: string;
+  hot?: string;
+  hot_score?: string;
+}
+
+interface BilibiliItem {
+  keyword: string;
+  hot?: number;
+}
+
+interface ToutiaoItem {
+  Title: string;
+  HotValue: number;
+}
+
+interface DouyinItem {
+  word: string;
+  sentence_id: string;
+  hot_value: string;
+}
+
+interface CacheData {
+  weibo: HotNewsItem[];
+  baidu: HotNewsItem[];
+  bilibili: HotNewsItem[];
+  toutiao: HotNewsItem[];
+  douyin: HotNewsItem[];
+}
+
 // 内存缓存
 let cache: {
-  data: any;
+  data: CacheData;
   timestamp: number;
 } | null = null;
 
@@ -19,12 +55,28 @@ const CACHE_TIME = 15 * 60 * 1000; // 15分钟
 // 获取微博热搜
 async function getWeiboHotNews(): Promise<HotNewsItem[]> {
   try {
-    const response = await fetch('https://weibo.com/ajax/side/hotSearch');
+    const response = await fetch('https://weibo.com/ajax/side/hotSearch', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Referer': 'https://weibo.com'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
     const data = await response.json();
+    
+    // 检查数据结构是否存在
+    if (!data || !data.data || !data.data.realtime) {
+      console.error('Weibo API response structure changed:', data);
+      throw new Error('Invalid response structure');
+    }
     
     return data.data.realtime
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: WeiboItem) => ({
         title: item.note,
         url: `https://s.weibo.com/weibo?q=${encodeURIComponent(item.note)}`,
         views: `${(item.num / 10000).toFixed(1)}万`,
@@ -32,6 +84,35 @@ async function getWeiboHotNews(): Promise<HotNewsItem[]> {
       }));
   } catch (error) {
     console.error('Failed to fetch Weibo hot news:', error);
+    
+    // 尝试备用API
+    try {
+      const backupResponse = await fetch('https://api.vvhan.com/api/hotlist?type=weibo', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      });
+      
+      if (!backupResponse.ok) {
+        throw new Error(`Backup API HTTP error! status: ${backupResponse.status}`);
+      }
+      
+      const backupData = await backupResponse.json();
+      
+      if (backupData.success && backupData.data) {
+        return backupData.data
+          .slice(0, 5)
+          .map((item: BaiduItem) => ({
+            title: item.title,
+            url: item.url || `https://s.weibo.com/weibo?q=${encodeURIComponent(item.title)}`,
+            views: item.hot || '热搜',
+            platform: 'weibo'
+          }));
+      }
+    } catch (backupError) {
+      console.error('Failed to fetch Weibo hot news from backup API:', backupError);
+    }
+    
     return [];
   }
 }
@@ -49,7 +130,7 @@ async function getBaiduHotNews(): Promise<HotNewsItem[]> {
       
       return backupData.data
         .slice(0, 5)
-        .map((item: any) => ({
+        .map((item: BaiduItem) => ({
           title: item.title,
           url: item.url,
           views: item.hot || '热搜',
@@ -59,7 +140,7 @@ async function getBaiduHotNews(): Promise<HotNewsItem[]> {
     
     return data.data
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: BaiduItem) => ({
         title: item.title,
         url: item.url,
         views: item.hot_score || '热搜',
@@ -106,7 +187,7 @@ async function getBilibiliHotNews(): Promise<HotNewsItem[]> {
     
     return data.data.trending.list
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: BilibiliItem) => ({
         title: item.keyword,
         url: `https://search.bilibili.com/all?keyword=${encodeURIComponent(item.keyword)}`,
         views: `${item.hot || '热'}`,
@@ -121,7 +202,7 @@ async function getBilibiliHotNews(): Promise<HotNewsItem[]> {
       
       return backupData.data
         .slice(0, 5)
-        .map((item: any) => ({
+        .map((item: BaiduItem) => ({
           title: item.title,
           url: item.url || `https://search.bilibili.com/all?keyword=${encodeURIComponent(item.title)}`,
           views: `${item.hot || '热'}`,
@@ -142,7 +223,7 @@ async function getToutiaoHotNews(): Promise<HotNewsItem[]> {
     
     return data.data
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: ToutiaoItem) => ({
         title: item.Title,
         url: `https://www.toutiao.com/search/?keyword=${encodeURIComponent(item.Title)}`,
         views: `${(item.HotValue / 10000).toFixed(1)}万`,
@@ -163,7 +244,7 @@ async function getDouyinHotNews(): Promise<HotNewsItem[]> {
     if (data.status_code === 0) {
       return data.data.word_list
         .slice(0, 5)
-        .map((item: any) => ({
+        .map((item: DouyinItem) => ({
           title: item.word,
           url: `https://www.douyin.com/hot/${encodeURIComponent(item.sentence_id)}`,
           views: `${(Number(item.hot_value) / 10000).toFixed(1)}万`,
@@ -180,7 +261,7 @@ async function getDouyinHotNews(): Promise<HotNewsItem[]> {
       
       return backupData.data
         .slice(0, 5)
-        .map((item: any) => ({
+        .map((item: BaiduItem) => ({
           title: item.title,
           url: `https://www.douyin.com/search/${encodeURIComponent(item.title)}`,
           views: item.hot || '热搜',
@@ -241,4 +322,4 @@ export async function GET() {
     console.error('Error in hot news API:', error);
     return NextResponse.json({ error: 'Failed to fetch hot news' }, { status: 500 });
   }
-} 
+}

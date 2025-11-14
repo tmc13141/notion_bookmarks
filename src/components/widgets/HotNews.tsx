@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface HotNewsItem {
